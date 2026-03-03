@@ -8,7 +8,7 @@ body{
 margin:0;
 font-family:Arial,sans-serif;
 text-align:center;
-background:linear-gradient(135deg,#ff416c,#ff4b2b);
+background:linear-gradient(135deg,#1f4037,#99f2c8);
 color:white;
 transition:0.4s;
 overflow-x:hidden;
@@ -19,7 +19,7 @@ overflow-x:hidden;
 position:fixed;
 top:20px;
 right:20px;
-background:#ff0000;
+background:#ff3b3b;
 color:white;
 padding:10px 15px;
 font-weight:bold;
@@ -27,7 +27,6 @@ border-radius:8px;
 text-decoration:none;
 box-shadow:0 0 15px red;
 z-index:999;
-transition:0.2s;
 }
 .escape-btn:hover{transform:scale(1.1);}
 
@@ -44,17 +43,17 @@ z-index:-1;
 position:absolute;
 width:4px;
 height:4px;
-background:#fff;
+background:#ffffffaa;
 border-radius:50%;
-opacity:0.6;
 }
 
-h1{margin-top:60px;font-size:40px;text-shadow:2px 2px 10px black;}
+/* UI */
+h1{margin-top:60px;font-size:38px;text-shadow:2px 2px 10px black;}
 
 #progressContainer{
 width:80%;
 height:10px;
-background:rgba(255,255,255,0.2);
+background:rgba(255,255,255,0.3);
 margin:20px auto;
 border-radius:20px;
 overflow:hidden;
@@ -67,9 +66,7 @@ transition:0.4s;
 }
 
 #counter{opacity:0.8;margin:10px;}
-#timer{opacity:0.8;}
-
-#question{font-size:24px;margin:30px;min-height:60px;}
+#question{font-size:22px;margin:30px;min-height:90px;white-space:pre-line;}
 
 button{
 padding:15px 30px;
@@ -80,11 +77,28 @@ border-radius:30px;
 cursor:pointer;
 transition:0.2s;
 }
-.red{background:#ff0000;color:white;}
+.red{background:#ff2d2d;color:white;}
 .green{background:#00c853;color:white;}
 .modeBtn{background:black;color:yellow;border:2px solid yellow;}
 
 button:hover{transform:scale(1.1);}
+
+.dark-mode{
+background:#111 !important;
+color:#00ffcc;
+}
+
+/* INTENSE MODE */
+.intense{
+animation:glitch 0.2s infinite alternate;
+}
+@keyframes glitch{
+0%{transform:translate(1px,1px) rotate(0deg);}
+25%{transform:translate(-2px,2px) rotate(-1deg);}
+50%{transform:translate(2px,-1px) rotate(1deg);}
+75%{transform:translate(-1px,-2px) rotate(0deg);}
+100%{transform:translate(1px,2px) rotate(-1deg);}
+}
 
 .shake{animation:shake 0.4s;}
 @keyframes shake{
@@ -94,18 +108,6 @@ button:hover{transform:scale(1.1);}
 75%{transform:translateX(-10px);}
 100%{transform:translateX(0);}
 }
-
-.dark-mode{
-background:#111 !important;
-color:#00ffcc;
-}
-
-#leaderboard{
-margin-top:20px;
-font-size:14px;
-opacity:0.9;
-}
-
 </style>
 </head>
 
@@ -119,136 +121,119 @@ opacity:0.9;
 
 <div id="progressContainer"><div id="progressBar"></div></div>
 <div id="counter"></div>
-<div id="timer"></div>
 <div id="question"></div>
 
 <button class="red" onclick="answer('red')">🚩 Red Flag</button>
 <button class="green" onclick="answer('green')">🌿 Green Flag</button>
 <br>
-<button class="modeBtn" onclick="startTimeAttack()">⏱ TIME ATTACK</button>
 <button class="modeBtn" onclick="toggleDarkMode()">🌙 DARK MODE</button>
-
-<div id="leaderboard"></div>
+<button class="modeBtn" onclick="toggleIntense()">🔥 INTENSE MODE</button>
 
 <script>
+
+/* SOUNDS */
+const correctSound=new Audio("https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3");
+const wrongSound=new Audio("https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3");
+
 /* PARTICLES */
-const particleContainer=document.getElementById("particles");
+const container=document.getElementById("particles");
 for(let i=0;i<60;i++){
 let p=document.createElement("div");
 p.className="particle";
 p.style.left=Math.random()*window.innerWidth+"px";
 p.style.top=Math.random()*window.innerHeight+"px";
-particleContainer.appendChild(p);
+container.appendChild(p);
 setInterval(()=>{
 p.style.top=(parseFloat(p.style.top)-0.5)+"px";
-if(parseFloat(p.style.top)<0)
-p.style.top=window.innerHeight+"px";
+if(parseFloat(p.style.top)<0)p.style.top=window.innerHeight+"px";
 },30);
 }
 
 /* QUESTIONS */
 let questions=[
-{q:"They hide their phone instantly.",correct:"red"},
-{q:"They remember your coffee order.",correct:"green"},
-{q:"All exes were crazy.",correct:"red"},
-{q:"They communicate properly.",correct:"green"},
-{q:"They ghost then come back.",correct:"red"},
-{q:"They defend you publicly.",correct:"green"},
-{q:"They flirt 'as a joke'.",correct:"red"},
-{q:"They hype you before big moments.",correct:"green"}
+{q:`They post “single life lowkey peaceful” while actively dating you.\n🚩 Red flag — soft single, hard unavailable.`,correct:"red"},
+{q:`They repost relationship quotes but won’t claim you.\n🚩 Red flag — aesthetic love, zero commitment.`,correct:"red"},
+{q:`They make a playlist named after you.\n🟢 Green flag — intentional and a little obsessed (the healthy way).`,correct:"green"},
+{q:`They start arguments before going out “just in case.”\n🚩 Red flag — premeditated drama is wild.`,correct:"red"},
+{q:`They hype your selfies in comments, not just DMs.\n🟢 Green flag — public support > private thirst.`,correct:"green"},
+{q:`They call you “bro” in public but “baby” in private.\n🚩 Red flag — identity crisis relationship.`,correct:"red"},
+{q:`They actually delete dating apps without you asking.\n🟢 Green flag — alignment > confusion.`,correct:"green"},
+{q:`They say “I like crazy girls/guys” and then trigger you on purpose.\n🚩 Red flag — romanticizing toxicity is not a personality.`,correct:"red"}
 ];
 
-let activeSet=questions.sort(()=>Math.random()-0.5);
+questions.sort(()=>Math.random()-0.5);
+
 let current=0;
 let score=0;
-let timer=0;
-let timerInterval=null;
 
 /* LOAD */
 function loadQuestion(){
-if(current<activeSet.length){
+if(current<questions.length){
 document.getElementById("counter").innerText=
-"Q"+(current+1)+" / "+activeSet.length;
+"Q"+(current+1)+" / "+questions.length;
 document.getElementById("question").innerText=
-activeSet[current].q;
+questions[current].q;
 updateProgress();
 }else endGame();
 }
 
 /* ANSWER */
 function answer(choice){
-if(choice===activeSet[current].correct){
+if(choice===questions[current].correct){
 score++;
-flash("green");
+correctSound.play();
+flash("#00c853");
 }else{
+wrongSound.play();
 document.body.classList.add("shake");
 setTimeout(()=>document.body.classList.remove("shake"),400);
-flash("darkred");
+flash("#ff0000");
 }
 current++;
 setTimeout(loadQuestion,600);
 }
 
 function updateProgress(){
-let percent=(current/activeSet.length)*100;
+let percent=(current/questions.length)*100;
 document.getElementById("progressBar").style.width=percent+"%";
 }
 
-/* END GAME */
-function endGame(){
-clearInterval(timerInterval);
-saveScore(score);
-let total=activeSet.length;
-let msg=score>total/2?"You see the signs.":"Red flag energy detected.";
-
-document.body.innerHTML+=`
-<h2>${score}/${total}</h2>
-<p>${msg}</p>
-<p>⏱ ${timer}s</p>
-<button onclick="location.reload()">Play Again</button>
-`;
-showLeaderboard();
-}
-
-/* TIME ATTACK */
-function startTimeAttack(){
-timer=0;
-timerInterval=setInterval(()=>{
-timer++;
-document.getElementById("timer").innerText="⏱ "+timer+"s";
-},1000);
-}
-
-/* FLASH */
+/* FLASH WORKS IN DARK MODE TOO */
 function flash(color){
+let oldBg=document.body.style.background;
 document.body.style.background=color;
 setTimeout(()=>{
-document.body.style.background=
-"linear-gradient(135deg,#ff416c,#ff4b2b)";
+document.body.style.background="";
 },300);
 }
 
-/* DARK MODE */
+/* END */
+function endGame(){
+let total=questions.length;
+let taglines=[
+"Certified Situationship Survivor.",
+"Emotionally literate. Impressive.",
+"Soft heart, sharp instincts.",
+"Delulu but aware.",
+"Professional Red Flag Detector.",
+"A walking relationship audit."
+];
+let tagline=taglines[Math.floor(Math.random()*taglines.length)];
+
+document.body.innerHTML+=`
+<h2>${score}/${total}</h2>
+<p>${tagline}</p>
+<button onclick="location.reload()">Play Again</button>
+`;
+}
+
+/* MODES */
 function toggleDarkMode(){
 document.body.classList.toggle("dark-mode");
 }
 
-/* LEADERBOARD */
-function saveScore(s){
-let scores=JSON.parse(localStorage.getItem("rfScores"))||[];
-scores.push(s);
-scores.sort((a,b)=>b-a);
-scores=scores.slice(0,5);
-localStorage.setItem("rfScores",JSON.stringify(scores));
-}
-
-function showLeaderboard(){
-let scores=JSON.parse(localStorage.getItem("rfScores"))||[];
-let html="<h3>🏆 Local Leaderboard</h3>";
-scores.forEach((s,i)=>{
-html+=`#${i+1} — ${s}<br>`;
-});
-document.getElementById("leaderboard").innerHTML=html;
+function toggleIntense(){
+document.body.classList.toggle("intense");
 }
 
 loadQuestion();
