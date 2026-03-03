@@ -237,3 +237,26 @@ h1 {
     transform: scale(1.1);
     background-color: #ff0000;
 }
+#angryPopup{
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#111;
+color:red;
+padding:20px;
+border-radius:15px;
+width:300px;
+border:2px solid red;
+font-weight:bold;
+animation:shake 0.3s infinite;
+}
+
+@keyframes shake{
+0%{transform:translate(-50%,-50%) translateX(0);}
+25%{transform:translate(-50%,-50%) translateX(-5px);}
+50%{transform:translate(-50%,-50%) translateX(5px);}
+75%{transform:translate(-50%,-50%) translateX(-5px);}
+100%{transform:translate(-50%,-50%) translateX(0);}
+}
