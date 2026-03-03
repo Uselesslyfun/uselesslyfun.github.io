@@ -2,15 +2,31 @@
 <html>
 <head>
 <title>🚩 Red Flag or Green Flag</title>
+<meta charset="UTF-8">
 
 <style>
 body{
 margin:0;
-font-family:Arial,sans-serif;
+font-family:Arial, sans-serif;
 text-align:center;
-background:linear-gradient(135deg,#141e30,#243b55);
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
 color:white;
-overflow-x:hidden;
+overflow:hidden;
+}
+
+/* LOADING SCREEN */
+#loadingScreen{
+position:fixed;
+width:100%;
+height:100%;
+background:black;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:1000;
+font-size:28px;
+letter-spacing:2px;
 }
 
 /* ESCAPE */
@@ -27,7 +43,6 @@ text-decoration:none;
 box-shadow:0 0 15px red;
 z-index:999;
 }
-.escape-btn:hover{transform:scale(1.1);}
 
 /* PARTICLES */
 .particles{
@@ -44,9 +59,20 @@ background:#ffffffaa;
 border-radius:50%;
 }
 
-/* UI */
-h1{margin-top:60px;font-size:38px;text-shadow:2px 2px 10px black;}
+/* TITLE ANIMATION */
+h1{
+margin-top:80px;
+font-size:40px;
+opacity:0;
+transform:translateY(-20px);
+animation:fadeIn 1s forwards 2s;
+}
 
+@keyframes fadeIn{
+to{opacity:1;transform:translateY(0);}
+}
+
+/* GAME */
 #progressContainer{
 width:80%;
 height:10px;
@@ -62,12 +88,8 @@ background:#00ff88;
 transition:0.4s;
 }
 
-#counter{opacity:0.8;margin:10px;}
-#question{
-font-size:22px;
-margin:30px;
-min-height:80px;
-}
+#counter{margin:10px;}
+#question{font-size:22px;margin:30px;min-height:80px;}
 
 button{
 padding:15px 30px;
@@ -94,14 +116,23 @@ button:hover{transform:scale(1.1);}
 100%{transform:translateX(0);}
 }
 
-.result{
+.resultCard{
 margin-top:30px;
-font-size:22px;
+padding:20px;
+border:2px solid white;
+border-radius:15px;
+display:inline-block;
+background:rgba(0,0,0,0.4);
 }
 </style>
 </head>
 
 <body>
+
+<div id="loadingScreen">
+Analyzing your dating instincts...
+<div style="margin-top:20px;font-size:14px;opacity:0.6;">Please don’t lie.</div>
+</div>
 
 <a href="index.html" class="escape-btn">⚠ ESCAPE THIS PAGE</a>
 
@@ -120,44 +151,56 @@ font-size:22px;
 
 <script>
 
-/* SOUNDS */
-const correctSound=new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b3f1c.mp3?filename=correct-2-46134.mp3");
-const wrongSound=new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_38b0f8c2cb.mp3?filename=error-126627.mp3");
-const booSound=new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_c7a6f6e7d8.mp3?filename=boo-6377.mp3");
-const clapSound=new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_45b9f38e70.mp3?filename=applause-2-46165.mp3");
+/* ---------- FIXED SOUNDS ---------- */
+const correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+const booSound = new Audio("https://actions.google.com/sounds/v1/crowds/boo.ogg");
+const clapSound = new Audio("https://actions.google.com/sounds/v1/crowds/applause.ogg");
 
-/* PARTICLES */
+function playSound(sound){
+sound.currentTime = 0;
+sound.play().catch(()=>{});
+}
+
+/* ---------- LOADING ---------- */
+setTimeout(()=>{
+document.getElementById("loadingScreen").style.display="none";
+document.body.style.overflow="auto";
+},2000);
+
+/* ---------- PARTICLES ---------- */
 const container=document.getElementById("particles");
-for(let i=0;i<60;i++){
+for(let i=0;i<50;i++){
 let p=document.createElement("div");
 p.className="particle";
 p.style.left=Math.random()*window.innerWidth+"px";
 p.style.top=Math.random()*window.innerHeight+"px";
 container.appendChild(p);
 setInterval(()=>{
-p.style.top=(parseFloat(p.style.top)-0.5)+"px";
+p.style.top=(parseFloat(p.style.top)-0.4)+"px";
 if(parseFloat(p.style.top)<0)p.style.top=window.innerHeight+"px";
 },30);
 }
 
-/* QUESTIONS */
-let questions=[
-{q:"They post 'single life lowkey peaceful' while actively dating you.",correct:"red"},
+/* ---------- DAILY ROTATION ---------- */
+const baseQuestions=[
+{q:"They post single life lowkey peaceful while dating you.",correct:"red"},
 {q:"They repost relationship quotes but won’t claim you.",correct:"red"},
 {q:"They make a playlist named after you.",correct:"green"},
-{q:"They start arguments before going out just in case.",correct:"red"},
-{q:"They hype your selfies in comments, not just DMs.",correct:"green"},
+{q:"They start arguments before going out.",correct:"red"},
+{q:"They hype your selfies publicly.",correct:"green"},
 {q:"They call you bro in public but baby in private.",correct:"red"},
-{q:"They actually delete dating apps without you asking.",correct:"green"},
-{q:"They say they like crazy people then trigger you on purpose.",correct:"red"}
+{q:"They delete dating apps without asking.",correct:"green"},
+{q:"They trigger you for fun.",correct:"red"}
 ];
 
-questions.sort(()=>Math.random()-0.5);
-
+let today=new Date().getDate();
+let questions=[...baseQuestions].sort(()=>0.5-Math.sin(today));
 let current=0;
 let score=0;
 let finished=false;
 
+/* ---------- LOAD ---------- */
 function loadQuestion(){
 if(current<questions.length){
 document.getElementById("counter").innerText=
@@ -170,15 +213,16 @@ endGame();
 }
 }
 
+/* ---------- ANSWER ---------- */
 function answer(choice){
 if(finished) return;
 
 if(choice===questions[current].correct){
 score++;
-correctSound.play();
+playSound(correctSound);
 flash("#00c853");
 }else{
-wrongSound.play();
+playSound(wrongSound);
 document.body.classList.add("shake");
 setTimeout(()=>document.body.classList.remove("shake"),400);
 flash("#ff0000");
@@ -195,48 +239,56 @@ document.getElementById("progressBar").style.width=percent+"%";
 function flash(color){
 let old=document.body.style.background;
 document.body.style.background=color;
-setTimeout(()=>{
-document.body.style.background="";
-},300);
+setTimeout(()=>document.body.style.background="",300);
 }
 
+/* ---------- RESULT ---------- */
 function endGame(){
 finished=true;
 
 let total=questions.length;
 let quote="";
+
 if(score<=2){
-quote="You are romantically blind. Please log off.";
-booSound.play();
+quote="You are romantically blind.";
+playSound(booSound);
 }
 else if(score<=5){
-quote="You see some signs… but you still text back.";
+quote="You see the signs… but you still reply fast.";
 }
 else{
-quote="Certified Red Flag Detector. Emotionally intelligent icon.";
-clapSound.play();
+quote="Certified Red Flag Detector.";
+playSound(clapSound);
 }
 
 document.getElementById("result").innerHTML=`
-<div class="result">
+<div class="resultCard">
 <h2>${score}/${total}</h2>
 <p>${quote}</p>
 <button class="funBtn" onclick="location.reload()">Play Again</button>
-<button class="funBtn" onclick="shareScore()">Share This Chaos</button>
-<button class="funBtn" onclick="sendToThem()">Send To Your Situationship</button>
+<button class="funBtn" onclick="shareScore(${score})">Share Score</button>
 </div>
 `;
 }
 
-function shareScore(){
-alert("Screenshot your score and post it. Tag your situationship.");
+/* ---------- SHAREABLE LINK ---------- */
+function shareScore(s){
+let url=window.location.origin+window.location.pathname+"?score="+s;
+navigator.clipboard.writeText(url);
+alert("Link copied. Send it to them 😈");
 }
 
-function sendToThem(){
-alert("Send this link and say 'Be honest.' 😈");
-}
-
+/* AUTO RESULT IF URL HAS SCORE */
+const params=new URLSearchParams(window.location.search);
+if(params.get("score")){
+document.getElementById("loadingScreen").style.display="none";
+document.body.style.overflow="auto";
+score=parseInt(params.get("score"));
+current=baseQuestions.length;
+endGame();
+}else{
 loadQuestion();
+}
 
 </script>
 
