@@ -160,4 +160,80 @@ body {
 .redgreen-card h2, .redgreen-card p {
     position: relative;
     z-index: 2;
+}body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #111;
+    color: white;
+    transition: background-color 0.4s ease;
+}
+
+.game-container {
+    margin-top: 100px;
+}
+
+h1 {
+    font-size: 32px;
+}
+
+.subtitle {
+    font-size: 16px;
+    opacity: 0.7;
+    margin-bottom: 30px;
+}
+
+#scenario {
+    font-size: 24px;
+    margin: 30px 0;
+}
+
+.buttons button {
+    padding: 15px 25px;
+    margin: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+.buttons button:hover {
+    transform: scale(1.1);
+}
+
+.disclaimer {
+    margin-top: 40px;
+    font-size: 12px;
+    opacity: 0.5;
+}.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.back-btn:hover {
+    opacity: 1;
+}.escape-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ff4444;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 13px;
+    border-radius: 6px;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.escape-btn:hover {
+    transform: scale(1.1);
+    background-color: #ff0000;
 }
