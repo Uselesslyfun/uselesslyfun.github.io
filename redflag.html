@@ -14,7 +14,7 @@ color:white;
 overflow:hidden;
 }
 
-/* LOADING SCREEN */
+/* Loading */
 #loadingScreen{
 position:fixed;
 width:100%;
@@ -25,11 +25,10 @@ flex-direction:column;
 justify-content:center;
 align-items:center;
 z-index:1000;
-font-size:28px;
-letter-spacing:2px;
+font-size:26px;
 }
 
-/* ESCAPE */
+/* Escape */
 .escape-btn{
 position:fixed;
 top:20px;
@@ -40,39 +39,39 @@ padding:10px 15px;
 font-weight:bold;
 border-radius:8px;
 text-decoration:none;
-box-shadow:0 0 15px red;
-z-index:999;
 }
 
-/* PARTICLES */
-.particles{
+/* Confetti */
+.confetti{
 position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-pointer-events:none;
-z-index:-1;
-}
-.particle{
-position:absolute;
-width:4px;height:4px;
-background:#ffffffaa;
-border-radius:50%;
+width:8px;
+height:8px;
+background:yellow;
+top:0;
+animation:fall 3s linear forwards;
 }
 
-/* TITLE ANIMATION */
-h1{
-margin-top:80px;
-font-size:40px;
+@keyframes fall{
+to{
+transform:translateY(100vh) rotate(720deg);
 opacity:0;
-transform:translateY(-20px);
-animation:fadeIn 1s forwards 2s;
+}
 }
 
-@keyframes fadeIn{
-to{opacity:1;transform:translateY(0);}
+/* Fake typing popup */
+#typingPopup{
+position:fixed;
+bottom:30px;
+right:30px;
+background:#111;
+padding:15px;
+border-radius:10px;
+display:none;
 }
 
-/* GAME */
+/* UI */
+h1{margin-top:80px;font-size:38px;}
+
 #progressContainer{
 width:80%;
 height:10px;
@@ -81,6 +80,7 @@ margin:20px auto;
 border-radius:20px;
 overflow:hidden;
 }
+
 #progressBar{
 height:100%;
 width:0%;
@@ -88,8 +88,7 @@ background:#00ff88;
 transition:0.4s;
 }
 
-#counter{margin:10px;}
-#question{font-size:22px;margin:30px;min-height:80px;}
+#question{font-size:22px;margin:30px;min-height:70px;}
 
 button{
 padding:15px 30px;
@@ -98,23 +97,11 @@ font-size:18px;
 border:none;
 border-radius:30px;
 cursor:pointer;
-transition:0.2s;
 }
 
 .red{background:#ff2d2d;color:white;}
 .green{background:#00c853;color:white;}
 .funBtn{background:black;color:yellow;border:2px solid yellow;}
-
-button:hover{transform:scale(1.1);}
-
-.shake{animation:shake 0.4s;}
-@keyframes shake{
-0%{transform:translateX(0);}
-25%{transform:translateX(-10px);}
-50%{transform:translateX(10px);}
-75%{transform:translateX(-10px);}
-100%{transform:translateX(0);}
-}
 
 .resultCard{
 margin-top:30px;
@@ -131,12 +118,10 @@ background:rgba(0,0,0,0.4);
 
 <div id="loadingScreen">
 Analyzing your dating instincts...
-<div style="margin-top:20px;font-size:14px;opacity:0.6;">Please don’t lie.</div>
+<div style="opacity:0.6;font-size:14px;">Don’t lie.</div>
 </div>
 
 <a href="index.html" class="escape-btn">⚠ ESCAPE THIS PAGE</a>
-
-<div class="particles" id="particles"></div>
 
 <h1>🚩 RED FLAG OR GREEN FLAG 🌿</h1>
 
@@ -149,41 +134,18 @@ Analyzing your dating instincts...
 
 <div id="result"></div>
 
+<div id="typingPopup">💬 Your ex is typing...</div>
+
 <script>
 
-/* ---------- FIXED SOUNDS ---------- */
-const correctSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-const wrongSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-const booSound = new Audio("https://actions.google.com/sounds/v1/crowds/boo.ogg");
-const clapSound = new Audio("https://actions.google.com/sounds/v1/crowds/applause.ogg");
-
-function playSound(sound){
-sound.currentTime = 0;
-sound.play().catch(()=>{});
-}
-
-/* ---------- LOADING ---------- */
+/* Loading */
 setTimeout(()=>{
 document.getElementById("loadingScreen").style.display="none";
 document.body.style.overflow="auto";
 },2000);
 
-/* ---------- PARTICLES ---------- */
-const container=document.getElementById("particles");
-for(let i=0;i<50;i++){
-let p=document.createElement("div");
-p.className="particle";
-p.style.left=Math.random()*window.innerWidth+"px";
-p.style.top=Math.random()*window.innerHeight+"px";
-container.appendChild(p);
-setInterval(()=>{
-p.style.top=(parseFloat(p.style.top)-0.4)+"px";
-if(parseFloat(p.style.top)<0)p.style.top=window.innerHeight+"px";
-},30);
-}
-
-/* ---------- DAILY ROTATION ---------- */
-const baseQuestions=[
+/* Questions */
+const questions=[
 {q:"They post single life lowkey peaceful while dating you.",correct:"red"},
 {q:"They repost relationship quotes but won’t claim you.",correct:"red"},
 {q:"They make a playlist named after you.",correct:"green"},
@@ -194,13 +156,12 @@ const baseQuestions=[
 {q:"They trigger you for fun.",correct:"red"}
 ];
 
-let today=new Date().getDate();
-let questions=[...baseQuestions].sort(()=>0.5-Math.sin(today));
+questions.sort(()=>Math.random()-0.5);
+
 let current=0;
 let score=0;
 let finished=false;
 
-/* ---------- LOAD ---------- */
 function loadQuestion(){
 if(current<questions.length){
 document.getElementById("counter").innerText=
@@ -213,18 +174,13 @@ endGame();
 }
 }
 
-/* ---------- ANSWER ---------- */
 function answer(choice){
 if(finished) return;
 
 if(choice===questions[current].correct){
 score++;
-playSound(correctSound);
 flash("#00c853");
 }else{
-playSound(wrongSound);
-document.body.classList.add("shake");
-setTimeout(()=>document.body.classList.remove("shake"),400);
 flash("#ff0000");
 }
 current++;
@@ -237,54 +193,87 @@ document.getElementById("progressBar").style.width=percent+"%";
 }
 
 function flash(color){
-let old=document.body.style.background;
 document.body.style.background=color;
 setTimeout(()=>document.body.style.background="",300);
 }
 
-/* ---------- RESULT ---------- */
+/* Confetti */
+function launchConfetti(){
+for(let i=0;i<80;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*window.innerWidth+"px";
+c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),3000);
+}
+}
+
+/* Brutal Roast Generator */
+const roasts=[
+"You fall in love with potential.",
+"You ignore red flags like they’re decorations.",
+"You definitely text first.",
+"You think ‘he’s just busy’.",
+"You can fix them. (You cannot.)",
+"You believe in ‘right person, wrong time.’"
+];
+
+/* Fake Typing Popup */
+function fakeTyping(){
+let popup=document.getElementById("typingPopup");
+popup.style.display="block";
+setTimeout(()=>{
+popup.innerText="💬 Your ex sent: 'hey stranger'";
+},3000);
+}
+
+/* End Game */
 function endGame(){
 finished=true;
 
 let total=questions.length;
 let quote="";
-
 if(score<=2){
-quote="You are romantically blind.";
-playSound(booSound);
+quote="Romantically blind.";
 }
 else if(score<=5){
 quote="You see the signs… but you still reply fast.";
 }
 else{
 quote="Certified Red Flag Detector.";
-playSound(clapSound);
+launchConfetti();
 }
+
+let roast=roasts[Math.floor(Math.random()*roasts.length)];
 
 document.getElementById("result").innerHTML=`
 <div class="resultCard">
 <h2>${score}/${total}</h2>
 <p>${quote}</p>
+<p style="opacity:0.7;">${roast}</p>
 <button class="funBtn" onclick="location.reload()">Play Again</button>
 <button class="funBtn" onclick="shareScore(${score})">Share Score</button>
 </div>
 `;
+
+setTimeout(fakeTyping,4000);
 }
 
-/* ---------- SHAREABLE LINK ---------- */
+/* Share */
 function shareScore(s){
-let url=window.location.origin+window.location.pathname+"?score="+s;
+let url=window.location.href.split('?')[0]+"?score="+s;
 navigator.clipboard.writeText(url);
 alert("Link copied. Send it to them 😈");
 }
 
-/* AUTO RESULT IF URL HAS SCORE */
+/* Auto score link */
 const params=new URLSearchParams(window.location.search);
 if(params.get("score")){
 document.getElementById("loadingScreen").style.display="none";
 document.body.style.overflow="auto";
 score=parseInt(params.get("score"));
-current=baseQuestions.length;
+current=questions.length;
 endGame();
 }else{
 loadQuestion();
