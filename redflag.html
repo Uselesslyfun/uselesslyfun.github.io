@@ -12,9 +12,9 @@ text-align:center;
 background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
 color:white;
 overflow:hidden;
+transition:0.3s;
 }
 
-/* Loading */
 #loadingScreen{
 position:fixed;
 width:100%;
@@ -28,7 +28,6 @@ z-index:1000;
 font-size:26px;
 }
 
-/* Escape */
 .escape-btn{
 position:fixed;
 top:20px;
@@ -36,40 +35,10 @@ right:20px;
 background:#ff3b3b;
 color:white;
 padding:10px 15px;
-font-weight:bold;
 border-radius:8px;
 text-decoration:none;
 }
 
-/* Confetti */
-.confetti{
-position:fixed;
-width:8px;
-height:8px;
-background:yellow;
-top:0;
-animation:fall 3s linear forwards;
-}
-
-@keyframes fall{
-to{
-transform:translateY(100vh) rotate(720deg);
-opacity:0;
-}
-}
-
-/* Fake typing popup */
-#typingPopup{
-position:fixed;
-bottom:30px;
-right:30px;
-background:#111;
-padding:15px;
-border-radius:10px;
-display:none;
-}
-
-/* UI */
 h1{margin-top:80px;font-size:38px;}
 
 #progressContainer{
@@ -111,6 +80,53 @@ border-radius:15px;
 display:inline-block;
 background:rgba(0,0,0,0.4);
 }
+
+/* Confetti */
+.confetti{
+position:fixed;
+width:8px;
+height:8px;
+top:0;
+animation:fall 3s linear forwards;
+}
+@keyframes fall{
+to{transform:translateY(100vh) rotate(720deg);opacity:0;}
+}
+
+/* Fake typing popup */
+#typingPopup{
+position:fixed;
+bottom:30px;
+right:30px;
+background:#111;
+padding:15px;
+border-radius:10px;
+display:none;
+}
+
+/* Lie detector glitch */
+.glitch{
+animation:glitch 0.2s infinite alternate;
+}
+@keyframes glitch{
+0%{transform:translate(2px,0);}
+50%{transform:translate(-2px,0);}
+100%{transform:translate(2px,0);}
+}
+
+/* Fake DM */
+#dmBox{
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+color:black;
+padding:20px;
+border-radius:15px;
+width:300px;
+}
 </style>
 </head>
 
@@ -118,7 +134,6 @@ background:rgba(0,0,0,0.4);
 
 <div id="loadingScreen">
 Analyzing your dating instincts...
-<div style="opacity:0.6;font-size:14px;">Don’t lie.</div>
 </div>
 
 <a href="index.html" class="escape-btn">⚠ ESCAPE THIS PAGE</a>
@@ -133,16 +148,50 @@ Analyzing your dating instincts...
 <button class="green" onclick="answer('green')">🌿 Green Flag</button>
 
 <div id="result"></div>
-
 <div id="typingPopup">💬 Your ex is typing...</div>
 
+<div id="dmBox">
+<b>Instagram DM</b>
+<hr>
+hey... saw your score 👀  
+so... was I the red flag?
+<br><br>
+<button onclick="closeDM()">Close</button>
+</div>
+
 <script>
+
+/* ---------- EMBEDDED SOUND SYSTEM ---------- */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playBeep(type){
+let osc = audioCtx.createOscillator();
+let gain = audioCtx.createGain();
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+
+if(type==="correct"){
+osc.frequency.value=800;
+gain.gain.value=0.2;
+}
+if(type==="wrong"){
+osc.frequency.value=200;
+gain.gain.value=0.3;
+}
+if(type==="notify"){
+osc.frequency.value=600;
+gain.gain.value=0.2;
+}
+
+osc.start();
+setTimeout(()=>osc.stop(),150);
+}
 
 /* Loading */
 setTimeout(()=>{
 document.getElementById("loadingScreen").style.display="none";
 document.body.style.overflow="auto";
-},2000);
+},1500);
 
 /* Questions */
 const questions=[
@@ -179,8 +228,10 @@ if(finished) return;
 
 if(choice===questions[current].correct){
 score++;
+playBeep("correct");
 flash("#00c853");
 }else{
+playBeep("wrong");
 flash("#ff0000");
 }
 current++;
@@ -199,7 +250,7 @@ setTimeout(()=>document.body.style.background="",300);
 
 /* Confetti */
 function launchConfetti(){
-for(let i=0;i<80;i++){
+for(let i=0;i<60;i++){
 let c=document.createElement("div");
 c.className="confetti";
 c.style.left=Math.random()*window.innerWidth+"px";
@@ -209,33 +260,47 @@ setTimeout(()=>c.remove(),3000);
 }
 }
 
-/* Brutal Roast Generator */
+/* Roast */
 const roasts=[
 "You fall in love with potential.",
-"You ignore red flags like they’re decorations.",
+"You ignore red flags like décor.",
 "You definitely text first.",
-"You think ‘he’s just busy’.",
-"You can fix them. (You cannot.)",
-"You believe in ‘right person, wrong time.’"
+"You think they’ll change.",
+"You believe in right person wrong time."
 ];
 
-/* Fake Typing Popup */
+/* Fake typing */
 function fakeTyping(){
 let popup=document.getElementById("typingPopup");
 popup.style.display="block";
+playBeep("notify");
 setTimeout(()=>{
 popup.innerText="💬 Your ex sent: 'hey stranger'";
+playBeep("notify");
+setTimeout(()=>document.getElementById("dmBox").style.display="block",1500);
 },3000);
 }
 
-/* End Game */
+function closeDM(){
+document.getElementById("dmBox").style.display="none";
+}
+
+/* Lie detector */
+function lieDetector(){
+document.body.classList.add("glitch");
+setTimeout(()=>document.body.classList.remove("glitch"),1500);
+}
+
+/* End */
 function endGame(){
 finished=true;
 
 let total=questions.length;
 let quote="";
+
 if(score<=2){
 quote="Romantically blind.";
+lieDetector();
 }
 else if(score<=5){
 quote="You see the signs… but you still reply fast.";
@@ -260,18 +325,16 @@ document.getElementById("result").innerHTML=`
 setTimeout(fakeTyping,4000);
 }
 
-/* Share */
 function shareScore(s){
 let url=window.location.href.split('?')[0]+"?score="+s;
 navigator.clipboard.writeText(url);
-alert("Link copied. Send it to them 😈");
+alert("Link copied 😈");
 }
 
-/* Auto score link */
+/* Shareable score */
 const params=new URLSearchParams(window.location.search);
 if(params.get("score")){
 document.getElementById("loadingScreen").style.display="none";
-document.body.style.overflow="auto";
 score=parseInt(params.get("score"));
 current=questions.length;
 endGame();
