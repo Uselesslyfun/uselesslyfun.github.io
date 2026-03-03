@@ -14,7 +14,42 @@ transition:0.4s;
 overflow-x:hidden;
 }
 
-h1{margin-top:30px;font-size:40px;text-shadow:2px 2px 10px black;}
+/* ESCAPE BUTTON */
+.escape-btn{
+position:fixed;
+top:20px;
+right:20px;
+background:#ff0000;
+color:white;
+padding:10px 15px;
+font-weight:bold;
+border-radius:8px;
+text-decoration:none;
+box-shadow:0 0 15px red;
+z-index:999;
+transition:0.2s;
+}
+.escape-btn:hover{transform:scale(1.1);}
+
+/* PARTICLES */
+.particles{
+position:fixed;
+top:0;left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+z-index:-1;
+}
+.particle{
+position:absolute;
+width:4px;
+height:4px;
+background:#fff;
+border-radius:50%;
+opacity:0.6;
+}
+
+h1{margin-top:60px;font-size:40px;text-shadow:2px 2px 10px black;}
 
 #progressContainer{
 width:80%;
@@ -24,7 +59,6 @@ margin:20px auto;
 border-radius:20px;
 overflow:hidden;
 }
-
 #progressBar{
 height:100%;
 width:0%;
@@ -33,6 +67,7 @@ transition:0.4s;
 }
 
 #counter{opacity:0.8;margin:10px;}
+#timer{opacity:0.8;}
 
 #question{font-size:24px;margin:30px;min-height:60px;}
 
@@ -45,7 +80,6 @@ border-radius:30px;
 cursor:pointer;
 transition:0.2s;
 }
-
 .red{background:#ff0000;color:white;}
 .green{background:#00c853;color:white;}
 .modeBtn{background:black;color:yellow;border:2px solid yellow;}
@@ -61,41 +95,29 @@ button:hover{transform:scale(1.1);}
 100%{transform:translateX(0);}
 }
 
-.fire{
-position:fixed;
-bottom:0;
-width:100%;
-height:200px;
-background:radial-gradient(circle at 50% 100%,orange,red,transparent);
-animation:fireRise 1s infinite alternate;
-pointer-events:none;
-}
-@keyframes fireRise{
-from{transform:translateY(20px);opacity:0.7;}
-to{transform:translateY(-10px);opacity:1;}
+.dark-mode{
+background:#111 !important;
+color:#00ffcc;
 }
 
-#warningBox{
-display:none;
-background:rgba(0,0,0,0.9);
-position:fixed;
-top:0;left:0;width:100%;height:100%;
-justify-content:center;
-align-items:center;
-flex-direction:column;
+#leaderboard{
+margin-top:20px;
+font-size:14px;
+opacity:0.9;
 }
 
-#timer{margin-top:10px;font-size:18px;opacity:0.8;}
-#achievements{margin-top:20px;font-size:14px;opacity:0.9;}
 </style>
 </head>
 
 <body>
 
+<a href="index.html" class="escape-btn">⚠ ESCAPE THIS PAGE</a>
+
+<div class="particles" id="particles"></div>
+
 <h1>🚩 RED FLAG OR GREEN FLAG 🌿</h1>
 
 <div id="progressContainer"><div id="progressBar"></div></div>
-
 <div id="counter"></div>
 <div id="timer"></div>
 <div id="question"></div>
@@ -103,62 +125,46 @@ flex-direction:column;
 <button class="red" onclick="answer('red')">🚩 Red Flag</button>
 <button class="green" onclick="answer('green')">🌿 Green Flag</button>
 <br>
-<button class="modeBtn" onclick="startIntense()">⚠ INTENSE</button>
 <button class="modeBtn" onclick="startTimeAttack()">⏱ TIME ATTACK</button>
-<button class="modeBtn" onclick="toggleMusic()">🎵 MUSIC</button>
+<button class="modeBtn" onclick="toggleDarkMode()">🌙 DARK MODE</button>
 
-<div id="achievements"></div>
-
-<div id="warningBox">
-<h2>⚠ WARNING ⚠</h2>
-<p>These questions will decide your FATE.</p>
-<button onclick="confirmIntense()">YES. I FEAR NOTHING.</button>
-<button onclick="closeWarning()">No I'm weak.</button>
-</div>
+<div id="leaderboard"></div>
 
 <script>
-let normalQuestions=[
-{q:"She still has Tinder installed... just in case.",correct:"red"},
-{q:"He hides his phone when you walk in.",correct:"red"},
-{q:"She hangs out with her boy bestie every weekend.",correct:"red"},
-{q:"He replies after 6 hours but was online.",correct:"red"},
-{q:"She posts relationship quotes daily.",correct:"red"},
-{q:"He remembers your smallest details.",correct:"green"},
-{q:"She defends you publicly.",correct:"green"},
-{q:"He communicates instead of disappearing.",correct:"green"}
-];
+/* PARTICLES */
+const particleContainer=document.getElementById("particles");
+for(let i=0;i<60;i++){
+let p=document.createElement("div");
+p.className="particle";
+p.style.left=Math.random()*window.innerWidth+"px";
+p.style.top=Math.random()*window.innerHeight+"px";
+particleContainer.appendChild(p);
+setInterval(()=>{
+p.style.top=(parseFloat(p.style.top)-0.5)+"px";
+if(parseFloat(p.style.top)<0)
+p.style.top=window.innerHeight+"px";
+},30);
+}
 
-let intenseQuestions=[
-{q:"All their exes were crazy.",correct:"red"},
-{q:"They flirt as a joke.",correct:"red"},
-{q:"They don't believe in labels.",correct:"red"},
-{q:"They're bad at texting but text others instantly.",correct:"red"},
-{q:"You're always 'overthinking'.",correct:"red"}
-];
-
-let secretQuestions=[
-{q:"They ghost then say 'I was healing'.",correct:"red"},
+/* QUESTIONS */
+let questions=[
+{q:"They hide their phone instantly.",correct:"red"},
 {q:"They remember your coffee order.",correct:"green"},
-{q:"They clap when plane lands.",correct:"red"},
-{q:"They send memes mid-argument.",correct:"green"}
+{q:"All exes were crazy.",correct:"red"},
+{q:"They communicate properly.",correct:"green"},
+{q:"They ghost then come back.",correct:"red"},
+{q:"They defend you publicly.",correct:"green"},
+{q:"They flirt 'as a joke'.",correct:"red"},
+{q:"They hype you before big moments.",correct:"green"}
 ];
 
-let activeSet=[];
+let activeSet=questions.sort(()=>Math.random()-0.5);
 let current=0;
 let score=0;
 let timer=0;
 let timerInterval=null;
-let timeAttack=false;
-let musicPlaying=false;
-let bgOsc=null;
 
-function shuffle(arr){return arr.sort(()=>Math.random()-0.5);}
-
-function updateProgress(){
-let percent=(current/activeSet.length)*100;
-document.getElementById("progressBar").style.width=percent+"%";
-}
-
+/* LOAD */
 function loadQuestion(){
 if(current<activeSet.length){
 document.getElementById("counter").innerText=
@@ -169,119 +175,51 @@ updateProgress();
 }else endGame();
 }
 
+/* ANSWER */
 function answer(choice){
 if(choice===activeSet[current].correct){
 score++;
 flash("green");
-playSound(true);
 }else{
 document.body.classList.add("shake");
 setTimeout(()=>document.body.classList.remove("shake"),400);
 flash("darkred");
-playSound(false);
 }
 current++;
-setTimeout(loadQuestion,700);
+setTimeout(loadQuestion,600);
 }
 
+function updateProgress(){
+let percent=(current/activeSet.length)*100;
+document.getElementById("progressBar").style.width=percent+"%";
+}
+
+/* END GAME */
 function endGame(){
 clearInterval(timerInterval);
-updateProgress();
-
+saveScore(score);
 let total=activeSet.length;
-let tagline="";
-let achievement="";
+let msg=score>total/2?"You see the signs.":"Red flag energy detected.";
 
-if(score===total){
-tagline="PERFECT SCORE. YOU ARE ELITE.";
-achievement="🏆 Achievement Unlocked: Relationship God";
-document.body.innerHTML+="<div class='fire'></div>";
-}
-else if(score>total/2){
-tagline="You see the signs... mostly.";
-achievement="🥈 Decent Judge";
-}
-else{
-tagline="Certified walking red flag.";
-achievement="💀 Needs Therapy";
-}
-
-if(timeAttack && timer<=10){
-achievement+="<br>⚡ Speed Demon";
-}
-
-if(score===total && total===intenseQuestions.length){
-achievement+="<br>🔓 Secret Mode Unlocked!";
-}
-
-let fakePlayers=1000+Math.floor(Math.random()*5000);
-let fakePercent=5+Math.floor(Math.random()*25);
-
-document.body.innerHTML=`
-<h2>${score} / ${total}</h2>
-<p>${tagline}</p>
-<p>${achievement}</p>
-<p style="opacity:0.7;margin-top:20px;">
-🌍 ${fakePlayers} played today<br>
-🔥 Only ${fakePercent}% scored this high
-</p>
-<p>⏱ Time: ${timer}s</p>
+document.body.innerHTML+=`
+<h2>${score}/${total}</h2>
+<p>${msg}</p>
+<p>⏱ ${timer}s</p>
 <button onclick="location.reload()">Play Again</button>
-<button onclick="shareResult(${score},${total})">Share</button>
 `;
+showLeaderboard();
 }
 
-function shareResult(s,t){
-let text="I scored "+s+"/"+t+" on Red Flag or Green Flag 😈";
-navigator.clipboard.writeText(text);
-alert("Copied to clipboard!");
-}
-
-function startIntense(){
-document.getElementById("warningBox").style.display="flex";
-}
-
-function confirmIntense(){
-activeSet=shuffle([...intenseQuestions]);
-current=0;score=0;timeAttack=false;
-timer=0;
-document.getElementById("warningBox").style.display="none";
-loadQuestion();
-}
-
-function closeWarning(){
-document.getElementById("warningBox").style.display="none";
-}
-
+/* TIME ATTACK */
 function startTimeAttack(){
-timeAttack=true;
-activeSet=shuffle([...normalQuestions]);
-current=0;score=0;timer=0;
+timer=0;
 timerInterval=setInterval(()=>{
 timer++;
 document.getElementById("timer").innerText="⏱ "+timer+"s";
 },1000);
-loadQuestion();
 }
 
-function toggleMusic(){
-if(!musicPlaying){
-const ctx=new(window.AudioContext||window.webkitAudioContext)();
-bgOsc=ctx.createOscillator();
-const gain=ctx.createGain();
-bgOsc.connect(gain);
-gain.connect(ctx.destination);
-bgOsc.type="sine";
-bgOsc.frequency.setValueAtTime(120,ctx.currentTime);
-gain.gain.setValueAtTime(0.05,ctx.currentTime);
-bgOsc.start();
-musicPlaying=true;
-}else{
-bgOsc.stop();
-musicPlaying=false;
-}
-}
-
+/* FLASH */
 function flash(color){
 document.body.style.background=color;
 setTimeout(()=>{
@@ -290,25 +228,29 @@ document.body.style.background=
 },300);
 }
 
-function playSound(correct){
-const ctx=new(window.AudioContext||window.webkitAudioContext)();
-const osc=ctx.createOscillator();
-const gain=ctx.createGain();
-osc.connect(gain);gain.connect(ctx.destination);
-osc.type="sawtooth";
-if(correct){
-osc.frequency.setValueAtTime(800,ctx.currentTime);
-osc.frequency.exponentialRampToValueAtTime(1400,ctx.currentTime+0.2);
-}else{
-osc.frequency.setValueAtTime(300,ctx.currentTime);
-osc.frequency.exponentialRampToValueAtTime(100,ctx.currentTime+0.4);
-}
-gain.gain.setValueAtTime(1,ctx.currentTime);
-gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.6);
-osc.start();osc.stop(ctx.currentTime+0.6);
+/* DARK MODE */
+function toggleDarkMode(){
+document.body.classList.toggle("dark-mode");
 }
 
-activeSet=shuffle([...normalQuestions]);
+/* LEADERBOARD */
+function saveScore(s){
+let scores=JSON.parse(localStorage.getItem("rfScores"))||[];
+scores.push(s);
+scores.sort((a,b)=>b-a);
+scores=scores.slice(0,5);
+localStorage.setItem("rfScores",JSON.stringify(scores));
+}
+
+function showLeaderboard(){
+let scores=JSON.parse(localStorage.getItem("rfScores"))||[];
+let html="<h3>🏆 Local Leaderboard</h3>";
+scores.forEach((s,i)=>{
+html+=`#${i+1} — ${s}<br>`;
+});
+document.getElementById("leaderboard").innerHTML=html;
+}
+
 loadQuestion();
 </script>
 
