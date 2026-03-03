@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Uselessly Fun</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Top Title -->
+<div class="top-title">
+    <span class="small-name">BY AYAN GUPTA</span>
+</div>
+
+<!-- Floating Particles -->
+<div class="particles"></div>
+
+<!-- Shock Canvas -->
+<canvas id="shockCanvas"></canvas>
+
+<!-- Main Content -->
+<div class="container">
+    <h1 class="site-name">USELESSLY FUN</h1>
+    <p class="subtitle">A collection of uselessly fun interactive things.</p>
+
+    <div class="grid">
+    <a href="redflag.html" class="card redgreen-card">
+        <h2>RED FLAG OR GREEN FLAG TEST</h2>
+        <p>Find out if you're a red flag or green flag personality!</p>
+    </a>
+</div>
+
+    <!-- Neon Smiley -->
+    <div class="neon-smiley">😎</div>
+</div>
+
+<!-- Floating Particles JS -->
+<script>
+const container = document.querySelector('.particles');
+function createParticle() {
+    const p = document.createElement('div');
+    p.classList.add('particle');
+    p.style.left = Math.random() * window.innerWidth + 'px';
+    p.style.top = Math.random() * window.innerHeight + 'px';
+    const size = Math.random() * 4 + 2;
+    p.style.width = p.style.height = size + 'px';
+    p.style.background = '#ff0';
+    p.speed = Math.random() * 0.5 + 0.2;
+    container.appendChild(p);
+    function animate() {
+        let top = parseFloat(p.style.top);
+        top -= p.speed;
+        if(top < -10) top = window.innerHeight + 10;
+        p.style.top = top + 'px';
+        requestAnimationFrame(animate);
+    }
+    animate();
+}
+for(let i=0;i<80;i++) createParticle();
+</script>
+
+<!-- Electric Shock with Sparks & Fade -->
+<script>
+const canvas = document.getElementById('shockCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let sparks = [];
+
+function drawLightning(x, y, length, angle, branchChance){
+    if(length < 5) return;
+    const x2 = x + Math.cos(angle) * length;
+    const y2 = y + Math.sin(angle) * length;
+
+    ctx.strokeStyle = '#ff0';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    for(let i=0;i<3;i++){
+        if(Math.random()<0.5){
+            const sparkAngle = Math.random()*Math.PI*2;
+            const sparkLength = 5 + Math.random()*5;
+            sparks.push({
+                x: x2,
+                y: y2,
+                dx: Math.cos(sparkAngle)*sparkLength*0.1,
+                dy: Math.sin(sparkAngle)*sparkLength*0.1,
+                alpha: 1
+            });
+        }
+    }
+
+    if(Math.random() < branchChance){
+        drawLightning(x2, y2, length*0.7, angle + (Math.random()-0.5)*1.5, branchChance*0.7);
+    }
+    drawLightning(x2, y2, length*0.8, angle + (Math.random()-0.5)*0.4, branchChance*0.9);
+}
+
+function animateSparks(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = `rgba(0,0,0,0.05)`;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    for(let i=0;i<sparks.length;i++){
+        const s = sparks[i];
+        ctx.strokeStyle = `rgba(255,255,0,${s.alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(s.x + s.dx*5, s.y + s.dy*5);
+        ctx.stroke();
+        s.x += s.dx*5;
+        s.y += s.dy*5;
+        s.alpha -= 0.05;
+    }
+    sparks = sparks.filter(s => s.alpha>0);
+    requestAnimationFrame(animateSparks);
+}
+animateSparks();
+
+document.addEventListener('click', e=>{
+    drawLightning(e.clientX, e.clientY, 60 + Math.random()*20, Math.random()*Math.PI*2, 0.3);
+});
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>

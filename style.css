@@ -1,0 +1,163 @@
+body {
+    margin:0;
+    padding:0;
+    font-family:'Poppins',sans-serif;
+    background: #000;
+    color: #fff;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Top Title */
+.top-title {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 30px;
+    text-align: left;
+}
+.small-name {
+    font-size: 16px;
+    color: #fff;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px #ff0, 0 0 10px #ff0;
+    animation: smallNameGlow 2s ease-in-out infinite alternate;
+}
+@keyframes smallNameGlow {
+    0% { text-shadow: 0 0 2px #ff0,0 0 5px #ff0,0 0 10px #ff0; }
+    50% { text-shadow: 0 0 5px #ff0,0 0 10px #ff0,0 0 15px #ff0; }
+    100% { text-shadow: 0 0 2px #ff0,0 0 5px #ff0,0 0 10px #ff0; }
+}
+
+/* Container */
+.container {
+    max-width:900px;
+    margin:120px auto 80px auto;
+    text-align:center;
+    position: relative;
+    z-index: 1;
+}
+
+/* Site Name Neon */
+@keyframes neonPulse {
+    0% { text-shadow: 0 0 5px #0ff,0 0 10px #0ff,0 0 20px #0ff,0 0 40px #0ff; }
+    50% { text-shadow: 0 0 10px #0ff,0 0 20px #0ff,0 0 40px #0ff,0 0 60px #0ff; }
+    100% { text-shadow: 0 0 5px #0ff,0 0 10px #0ff,0 0 20px #0ff,0 0 40px #0ff; }
+}
+.site-name {
+    font-size: 60px;
+    color: #fff;
+    letter-spacing: 4px;
+    animation: neonPulse 2s ease-in-out infinite;
+}
+
+/* Subtitle Glow - Yellow Neon */
+.subtitle {
+    color:#ff0;
+    margin-bottom:50px;
+    font-weight:300;
+    text-shadow: 0 0 5px #ff0,0 0 10px #ff0,0 0 20px #ff0;
+    animation: neonPulse 2s ease-in-out infinite;
+}
+
+/* Grid */
+.grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
+    padding: 0 30px;
+}
+
+/* Cards */
+.card {
+    text-decoration:none;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+    border-radius:15px;
+    padding:25px;
+    border:1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255,255,0,0.2);
+    transition: all 0.3s ease;
+}
+.card:hover {
+    border-color:#ff0;
+    transform: scale(1.05);
+    box-shadow: 0 0 25px #ff0, 0 0 50px #ff0500;
+}
+
+/* Floating Particles */
+.particles {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
+}
+.particle {
+    position: absolute;
+    border-radius: 50%;
+}
+
+/* Shock Canvas */
+#shockCanvas {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:5;
+}
+
+/* Neon Smiley */
+@keyframes smileyPulse {
+    0% { text-shadow: 0 0 5px #0ff,0 0 10px #0ff,0 0 20px #0ff,0 0 40px #0ff; }
+    50% { text-shadow: 0 0 10px #0ff,0 0 20px #0ff,0 0 40px #0ff,0 0 60px #0ff; }
+    100% { text-shadow: 0 0 5px #0ff,0 0 10px #0ff,0 0 20px #0ff,0 0 40px #0ff; }
+}
+.neon-smiley {
+    font-size: 80px;
+    color: #0ff;
+    margin-top: 80px;
+    animation: smileyPulse 2s ease-in-out infinite;
+}/* Red/Green Neon Edge Card */
+.redgreen-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.redgreen-card::before,
+.redgreen-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 8px; /* edge width */
+    height: 100%;
+    z-index: 1;
+}
+
+.redgreen-card::before {
+    left: 0;
+    background: linear-gradient(to bottom, #0f0, #0c0);
+    box-shadow: 0 0 15px #0f0, 0 0 30px #0f0;
+}
+
+.redgreen-card::after {
+    right: 0;
+    background: linear-gradient(to bottom, #f00, #c00);
+    box-shadow: 0 0 15px #f00, 0 0 30px #f00;
+}
+
+/* Keep text above edges */
+.redgreen-card h2, .redgreen-card p {
+    position: relative;
+    z-index: 2;
+}
