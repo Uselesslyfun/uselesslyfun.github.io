@@ -8,13 +8,12 @@ body{
 margin:0;
 font-family:Arial,sans-serif;
 text-align:center;
-background:linear-gradient(135deg,#1f4037,#99f2c8);
+background:linear-gradient(135deg,#141e30,#243b55);
 color:white;
-transition:0.4s;
 overflow-x:hidden;
 }
 
-/* ESCAPE BUTTON */
+/* ESCAPE */
 .escape-btn{
 position:fixed;
 top:20px;
@@ -34,15 +33,13 @@ z-index:999;
 .particles{
 position:fixed;
 top:0;left:0;
-width:100%;
-height:100%;
+width:100%;height:100%;
 pointer-events:none;
 z-index:-1;
 }
 .particle{
 position:absolute;
-width:4px;
-height:4px;
+width:4px;height:4px;
 background:#ffffffaa;
 border-radius:50%;
 }
@@ -66,7 +63,11 @@ transition:0.4s;
 }
 
 #counter{opacity:0.8;margin:10px;}
-#question{font-size:22px;margin:30px;min-height:90px;white-space:pre-line;}
+#question{
+font-size:22px;
+margin:30px;
+min-height:80px;
+}
 
 button{
 padding:15px 30px;
@@ -77,28 +78,12 @@ border-radius:30px;
 cursor:pointer;
 transition:0.2s;
 }
+
 .red{background:#ff2d2d;color:white;}
 .green{background:#00c853;color:white;}
-.modeBtn{background:black;color:yellow;border:2px solid yellow;}
+.funBtn{background:black;color:yellow;border:2px solid yellow;}
 
 button:hover{transform:scale(1.1);}
-
-.dark-mode{
-background:#111 !important;
-color:#00ffcc;
-}
-
-/* INTENSE MODE */
-.intense{
-animation:glitch 0.2s infinite alternate;
-}
-@keyframes glitch{
-0%{transform:translate(1px,1px) rotate(0deg);}
-25%{transform:translate(-2px,2px) rotate(-1deg);}
-50%{transform:translate(2px,-1px) rotate(1deg);}
-75%{transform:translate(-1px,-2px) rotate(0deg);}
-100%{transform:translate(1px,2px) rotate(-1deg);}
-}
 
 .shake{animation:shake 0.4s;}
 @keyframes shake{
@@ -107,6 +92,11 @@ animation:glitch 0.2s infinite alternate;
 50%{transform:translateX(10px);}
 75%{transform:translateX(-10px);}
 100%{transform:translateX(0);}
+}
+
+.result{
+margin-top:30px;
+font-size:22px;
 }
 </style>
 </head>
@@ -125,15 +115,16 @@ animation:glitch 0.2s infinite alternate;
 
 <button class="red" onclick="answer('red')">🚩 Red Flag</button>
 <button class="green" onclick="answer('green')">🌿 Green Flag</button>
-<br>
-<button class="modeBtn" onclick="toggleDarkMode()">🌙 DARK MODE</button>
-<button class="modeBtn" onclick="toggleIntense()">🔥 INTENSE MODE</button>
+
+<div id="result"></div>
 
 <script>
 
 /* SOUNDS */
-const correctSound=new Audio("https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3");
-const wrongSound=new Audio("https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3");
+const correctSound=new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b3f1c.mp3?filename=correct-2-46134.mp3");
+const wrongSound=new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_38b0f8c2cb.mp3?filename=error-126627.mp3");
+const booSound=new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_c7a6f6e7d8.mp3?filename=boo-6377.mp3");
+const clapSound=new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_45b9f38e70.mp3?filename=applause-2-46165.mp3");
 
 /* PARTICLES */
 const container=document.getElementById("particles");
@@ -151,22 +142,22 @@ if(parseFloat(p.style.top)<0)p.style.top=window.innerHeight+"px";
 
 /* QUESTIONS */
 let questions=[
-{q:`They post “single life lowkey peaceful” while actively dating you.\n🚩 Red flag — soft single, hard unavailable.`,correct:"red"},
-{q:`They repost relationship quotes but won’t claim you.\n🚩 Red flag — aesthetic love, zero commitment.`,correct:"red"},
-{q:`They make a playlist named after you.\n🟢 Green flag — intentional and a little obsessed (the healthy way).`,correct:"green"},
-{q:`They start arguments before going out “just in case.”\n🚩 Red flag — premeditated drama is wild.`,correct:"red"},
-{q:`They hype your selfies in comments, not just DMs.\n🟢 Green flag — public support > private thirst.`,correct:"green"},
-{q:`They call you “bro” in public but “baby” in private.\n🚩 Red flag — identity crisis relationship.`,correct:"red"},
-{q:`They actually delete dating apps without you asking.\n🟢 Green flag — alignment > confusion.`,correct:"green"},
-{q:`They say “I like crazy girls/guys” and then trigger you on purpose.\n🚩 Red flag — romanticizing toxicity is not a personality.`,correct:"red"}
+{q:"They post 'single life lowkey peaceful' while actively dating you.",correct:"red"},
+{q:"They repost relationship quotes but won’t claim you.",correct:"red"},
+{q:"They make a playlist named after you.",correct:"green"},
+{q:"They start arguments before going out just in case.",correct:"red"},
+{q:"They hype your selfies in comments, not just DMs.",correct:"green"},
+{q:"They call you bro in public but baby in private.",correct:"red"},
+{q:"They actually delete dating apps without you asking.",correct:"green"},
+{q:"They say they like crazy people then trigger you on purpose.",correct:"red"}
 ];
 
 questions.sort(()=>Math.random()-0.5);
 
 let current=0;
 let score=0;
+let finished=false;
 
-/* LOAD */
 function loadQuestion(){
 if(current<questions.length){
 document.getElementById("counter").innerText=
@@ -174,11 +165,14 @@ document.getElementById("counter").innerText=
 document.getElementById("question").innerText=
 questions[current].q;
 updateProgress();
-}else endGame();
+}else{
+endGame();
+}
 }
 
-/* ANSWER */
 function answer(choice){
+if(finished) return;
+
 if(choice===questions[current].correct){
 score++;
 correctSound.play();
@@ -198,45 +192,52 @@ let percent=(current/questions.length)*100;
 document.getElementById("progressBar").style.width=percent+"%";
 }
 
-/* FLASH WORKS IN DARK MODE TOO */
 function flash(color){
-let oldBg=document.body.style.background;
+let old=document.body.style.background;
 document.body.style.background=color;
 setTimeout(()=>{
 document.body.style.background="";
 },300);
 }
 
-/* END */
 function endGame(){
-let total=questions.length;
-let taglines=[
-"Certified Situationship Survivor.",
-"Emotionally literate. Impressive.",
-"Soft heart, sharp instincts.",
-"Delulu but aware.",
-"Professional Red Flag Detector.",
-"A walking relationship audit."
-];
-let tagline=taglines[Math.floor(Math.random()*taglines.length)];
+finished=true;
 
-document.body.innerHTML+=`
+let total=questions.length;
+let quote="";
+if(score<=2){
+quote="You are romantically blind. Please log off.";
+booSound.play();
+}
+else if(score<=5){
+quote="You see some signs… but you still text back.";
+}
+else{
+quote="Certified Red Flag Detector. Emotionally intelligent icon.";
+clapSound.play();
+}
+
+document.getElementById("result").innerHTML=`
+<div class="result">
 <h2>${score}/${total}</h2>
-<p>${tagline}</p>
-<button onclick="location.reload()">Play Again</button>
+<p>${quote}</p>
+<button class="funBtn" onclick="location.reload()">Play Again</button>
+<button class="funBtn" onclick="shareScore()">Share This Chaos</button>
+<button class="funBtn" onclick="sendToThem()">Send To Your Situationship</button>
+</div>
 `;
 }
 
-/* MODES */
-function toggleDarkMode(){
-document.body.classList.toggle("dark-mode");
+function shareScore(){
+alert("Screenshot your score and post it. Tag your situationship.");
 }
 
-function toggleIntense(){
-document.body.classList.toggle("intense");
+function sendToThem(){
+alert("Send this link and say 'Be honest.' 😈");
 }
 
 loadQuestion();
+
 </script>
 
 </body>
