@@ -106,7 +106,7 @@ border-radius:10px;
 display:none;
 }
 
-/* Fake DM */
+/* Normal DM */
 #dmBox{
 display:none;
 position:fixed;
@@ -118,6 +118,31 @@ color:black;
 padding:20px;
 border-radius:15px;
 width:300px;
+}
+
+/* Angry DM */
+#angryPopup{
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#111;
+color:red;
+padding:20px;
+border-radius:15px;
+width:300px;
+border:2px solid red;
+font-weight:bold;
+animation:shake 0.3s infinite;
+}
+
+@keyframes shake{
+0%{transform:translate(-50%,-50%) translateX(0);}
+25%{transform:translate(-50%,-50%) translateX(-5px);}
+50%{transform:translate(-50%,-50%) translateX(5px);}
+75%{transform:translate(-50%,-50%) translateX(-5px);}
+100%{transform:translate(-50%,-50%) translateX(0);}
 }
 
 /* Watcher popup */
@@ -155,15 +180,27 @@ Analyzing your dating instincts...
 <button class="green" onclick="answer('green')">🌿 Green Flag</button>
 
 <div id="result"></div>
+
 <div id="typingPopup">💬 Your ex is typing...</div>
 <div id="watcherPopup">👁 Someone is watching you play...</div>
 
+<!-- NORMAL DM -->
 <div id="dmBox">
 <b>Instagram DM</b>
 <hr>
-<div id="dmMessage"></div>
+hey... saw your score 👀  
+so... was I the red flag?
 <br><br>
 <button onclick="closeDM()">Close</button>
+</div>
+
+<!-- ANGRY DM -->
+<div id="angryPopup">
+<b>Instagram DM</b>
+<hr>
+😡😡 I KNEW IT U WERE THE RED FLAG LOSER 😤🚩
+<br><br>
+<button onclick="closeAngry()">Close</button>
 </div>
 
 <script>
@@ -277,7 +314,7 @@ playHorror();
 setTimeout(()=>popup.style.display="none",4000);
 }
 
-/* NEW DM LOGIC */
+/* Fake Typing + Score Logic */
 function fakeTyping(){
 let popup=document.getElementById("typingPopup");
 popup.style.display="block";
@@ -286,23 +323,23 @@ playNotify();
 setTimeout(()=>{
 popup.style.display="none";
 
-let dmText="";
-
-if(score<5){
-dmText="😡😡 I KNEW IT U WERE THE RED FLAG LOSER 😤🚩";
+if(score < 5){
+document.getElementById("angryPopup").style.display="block";
+playHorror();
 }else{
-dmText="hey... saw your score 👀 so... was I the red flag?";
-}
-
-document.getElementById("dmMessage").innerText=dmText;
 document.getElementById("dmBox").style.display="block";
 playNotify();
+}
 
 },1500);
 }
 
 function closeDM(){
 document.getElementById("dmBox").style.display="none";
+}
+
+function closeAngry(){
+document.getElementById("angryPopup").style.display="none";
 }
 
 /* End */
