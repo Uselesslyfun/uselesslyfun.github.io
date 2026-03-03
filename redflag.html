@@ -22,6 +22,12 @@
       margin-top: 60px;
     }
 
+    #counter {
+      font-size: 18px;
+      opacity: 0.8;
+      margin-bottom: 10px;
+    }
+
     #question {
       font-size: 24px;
       margin: 20px;
@@ -79,6 +85,10 @@
     #warningBox button {
       margin-top: 20px;
     }
+
+    #finalScreen {
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
@@ -86,6 +96,7 @@
 <h1>🚩 RED FLAG OR GREEN FLAG 🌿</h1>
 
 <div id="gameBox">
+  <div id="counter"></div>
   <div id="question"></div>
 
   <button class="red" onclick="answer('red')">🚩 Red Flag</button>
@@ -97,7 +108,6 @@
   <button class="intenseBtn" onclick="startIntense()">⚠ INTENSE VERSION</button>
 </div>
 
-<!-- WARNING POPUP -->
 <div id="warningBox">
   <h2>⚠ WARNING ⚠</h2>
   <p>These 5 questions will decide your FATE.</p>
@@ -107,7 +117,7 @@
 </div>
 
 <script>
-  let questions = [
+  let normalQuestions = [
     { q: "She still has Tinder installed... just in case.", correct: "red" },
     { q: "He says 'trust me' but hides his phone when you walk in.", correct: "red" },
     { q: "She hangs out alone with her boy bestie every weekend.", correct: "red" },
@@ -129,46 +139,57 @@
   let current = 0;
   let score = 0;
   let playingIntense = false;
+  let activeSet = [];
+
+  function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+  }
 
   function loadQuestion() {
-    let set = playingIntense ? intenseQuestions : questions;
+    if (current < activeSet.length) {
+      document.getElementById("counter").innerText =
+        "Q" + (current + 1) + " / " + activeSet.length;
 
-    if (current < set.length) {
-      document.getElementById("question").innerText = set[current].q;
+      document.getElementById("question").innerText =
+        activeSet[current].q;
     } else {
       endGame();
     }
   }
 
   function answer(choice) {
-    let set = playingIntense ? intenseQuestions : questions;
-
-    if (choice === set[current].correct) {
+    if (choice === activeSet[current].correct) {
       score++;
-      document.body.style.background = "green";
-      playCorrectSound();
+      flash("green");
+      playSound(true);
     } else {
-      document.body.style.background = "darkred";
-      playWrongSound();
+      flash("darkred");
+      playSound(false);
     }
 
-    setTimeout(() => {
-      document.body.style.background = "linear-gradient(135deg, #ff416c, #ff4b2b)";
-      current++;
-      loadQuestion();
-    }, 1000);
+    current++;
+    setTimeout(loadQuestion, 800);
   }
 
   function endGame() {
-    document.getElementById("question").innerText = "GAME OVER.";
-    document.getElementById("scoreBox").innerText =
-      "Your Score: " + score + " / " + 
-      (playingIntense ? intenseQuestions.length : questions.length);
+    let tagline = "";
 
-    if (playingIntense) {
-      document.getElementById("question").innerText =
-        score >= 4 ? "YOU SURVIVED THE INTENSE TEST 😈" : "YOU FAILED. REFLECT ON YOUR LIFE.";
-    }
+    let total = activeSet.length;
+
+    if (score <= 1) tagline = "Certified walking red flag.";
+    else if (score <= 3) tagline = "You need relationship supervision.";
+    else if (score <= total - 2) tagline = "Emotionally questionable.";
+    else if (score < total) tagline = "You see the signs… mostly.";
+    else tagline = "Green Flag Detector Master.";
+
+    document.getElementById("gameBox").innerHTML = `
+      <div id="finalScreen">
+        <h2>${score} / ${total}</h2>
+        <p>${tagline}</p>
+        <br>
+        <button onclick="location.reload()">Play Again</button>
+      </div>
+    `;
   }
 
   function startIntense() {
@@ -179,6 +200,7 @@
     playingIntense = true;
     current = 0;
     score = 0;
+    activeSet = shuffle([...intenseQuestions]);
     document.getElementById("warningBox").style.display = "none";
     loadQuestion();
   }
@@ -187,18 +209,41 @@
     document.getElementById("warningBox").style.display = "none";
   }
 
-  function playCorrectSound() {
-    let audio = new Audio("https://www.soundjay.com/buttons/sounds/button-4.mp3");
-    audio.volume = 1.0;
-    audio.play();
+  function flash(color) {
+    document.body.style.background = color;
+    setTimeout(() => {
+      document.body.style.background =
+        "linear-gradient(135deg, #ff416c, #ff4b2b)";
+    }, 300);
   }
 
-  function playWrongSound() {
-    let audio = new Audio("https://www.soundjay.com/buttons/sounds/button-10.mp3");
-    audio.volume = 1.0;
-    audio.play();
+  function playSound(correct) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+
+    osc.type = "sawtooth";
+
+    if (correct) {
+      osc.frequency.setValueAtTime(800, audioContext.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1400, audioContext.currentTime + 0.2);
+    } else {
+      osc.frequency.setValueAtTime(300, audioContext.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.4);
+    }
+
+    gain.gain.setValueAtTime(1, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6);
+
+    osc.start();
+    osc.stop(audioContext.currentTime + 0.6);
   }
 
+  // INITIAL START
+  activeSet = shuffle([...normalQuestions]);
   loadQuestion();
 </script>
 
