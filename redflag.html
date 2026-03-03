@@ -161,8 +161,10 @@ Analyzing your dating instincts...
 <div id="dmBox">
 <b>Instagram DM</b>
 <hr>
+<div id="dmMessage">
 hey... saw your score 👀  
 so... was I the red flag?
+</div>
 <br><br>
 <button onclick="closeDM()">Close</button>
 </div>
@@ -278,15 +280,30 @@ playHorror();
 setTimeout(()=>popup.style.display="none",4000);
 }
 
-/* Ex typing faster */
+/* EX + NEW LOSER MESSAGE */
 function fakeTyping(){
 let popup=document.getElementById("typingPopup");
 popup.style.display="block";
 playNotify();
+
 setTimeout(()=>{
 popup.innerText="💬 Your ex sent: 'hey stranger'";
 playNotify();
-setTimeout(()=>document.getElementById("dmBox").style.display="block",800);
+
+setTimeout(()=>{
+document.getElementById("dmBox").style.display="block";
+
+/* NEW CONDITION */
+if(score < 5){
+setTimeout(()=>{
+document.getElementById("dmMessage").innerHTML += 
+"<br><br><b>I KNEW IT U WERE THE RED FLAG LOSER.</b>";
+playNotify();
+},1200);
+}
+
+},800);
+
 },1500);
 }
 
