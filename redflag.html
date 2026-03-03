@@ -1,331 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>🚩 Red Flag or Green Flag</title>
-<meta charset="UTF-8">
-
-<style>
-body{
-margin:0;
-font-family:Arial, sans-serif;
-text-align:center;
-background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-color:white;
-overflow:hidden;
-transition:0.3s;
-}
-
-/* Loading */
-#loadingScreen{
-position:fixed;
-width:100%;
-height:100%;
-background:black;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:1000;
-font-size:26px;
-}
-
-/* Escape */
-.escape-btn{
-position:fixed;
-top:20px;
-right:20px;
-background:#ff3b3b;
-color:white;
-padding:10px 15px;
-border-radius:8px;
-text-decoration:none;
-}
-
-/* UI */
-h1{margin-top:80px;font-size:38px;}
-
-#progressContainer{
-width:80%;
-height:10px;
-background:rgba(255,255,255,0.3);
-margin:20px auto;
-border-radius:20px;
-overflow:hidden;
-}
-
-#progressBar{
-height:100%;
-width:0%;
-background:#00ff88;
-transition:0.4s;
-}
-
-#question{font-size:22px;margin:30px;min-height:70px;}
-
-button{
-padding:15px 30px;
-margin:10px;
-font-size:18px;
-border:none;
-border-radius:30px;
-cursor:pointer;
-}
-
-.red{background:#ff2d2d;color:white;}
-.green{background:#00c853;color:white;}
-.funBtn{background:black;color:yellow;border:2px solid yellow;}
-
-.resultCard{
-margin-top:30px;
-padding:20px;
-border:2px solid white;
-border-radius:15px;
-display:inline-block;
-background:rgba(0,0,0,0.4);
-}
-
-/* Confetti */
-.confetti{
-position:fixed;
-width:8px;
-height:8px;
-top:0;
-animation:fall 3s linear forwards;
-}
-@keyframes fall{
-to{transform:translateY(100vh) rotate(720deg);opacity:0;}
-}
-
-/* Ex popup */
-#typingPopup{
-position:fixed;
-bottom:30px;
-right:30px;
-background:#111;
-padding:15px;
-border-radius:10px;
-display:none;
-}
-
-/* Fake DM */
-#dmBox{
-display:none;
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:white;
-color:black;
-padding:20px;
-border-radius:15px;
-width:300px;
-}
-
-/* Watcher popup */
-#watcherPopup{
-display:none;
-position:fixed;
-top:20px;
-left:50%;
-transform:translateX(-50%);
-background:#111;
-padding:12px 20px;
-border-radius:10px;
-border:1px solid red;
-color:red;
-font-weight:bold;
-}
-</style>
+  <title>Red Flag Green Flag</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div id="loadingScreen">
-Analyzing your dating instincts...
+<div id="startScreen">
+  <h1>🚩 Red Flag Green Flag 🟢</h1>
+  <button onclick="startGame()">Start Game</button>
+  <br><br>
+  <button onclick="escapePage()">⚠ ESCAPE THIS PAGE</button>
 </div>
 
-<a href="index.html" class="escape-btn">⚠ ESCAPE THIS PAGE</a>
+<div id="gameScreen" style="display:none;">
+  <h2 id="questionCounter"></h2>
+  <p id="questionText"></p>
 
-<h1>🚩 RED FLAG OR GREEN FLAG 🌿</h1>
-
-<div id="progressContainer"><div id="progressBar"></div></div>
-<div id="counter"></div>
-<div id="question"></div>
-
-<button class="red" onclick="answer('red')">🚩 Red Flag</button>
-<button class="green" onclick="answer('green')">🌿 Green Flag</button>
-
-<div id="result"></div>
-<div id="typingPopup">💬 Your ex is typing...</div>
-<div id="watcherPopup">👁 Someone is watching you play...</div>
-
-<div id="dmBox">
-<b>Instagram DM</b>
-<hr>
-hey... saw your score 👀  
-so... was I the red flag?
-<br><br>
-<button onclick="closeDM()">Close</button>
+  <button onclick="answer('red')">🚩 Red Flag</button>
+  <button onclick="answer('green')">🟢 Green Flag</button>
 </div>
 
-<script>
+<div id="resultScreen" style="display:none;">
+  <h2 id="finalScore"></h2>
+  <p id="finalQuote"></p>
+  <p id="livePlayers"></p>
+  <p id="relationshipLabel"></p>
 
-/* AUDIO ENGINE */
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-function playTone(freq,duration){
-let osc=audioCtx.createOscillator();
-let gain=audioCtx.createGain();
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-osc.frequency.value=freq;
-gain.gain.value=0.2;
-osc.start();
-setTimeout(()=>osc.stop(),duration);
-}
-
-function playCorrect(){ playTone(850,150); }
-function playWrong(){ playTone(200,200); }
-function playNotify(){ playTone(600,120); }
-function playHorror(){
-let osc=audioCtx.createOscillator();
-let gain=audioCtx.createGain();
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-osc.frequency.value=60;
-gain.gain.value=0.4;
-osc.start();
-setTimeout(()=>osc.stop(),600);
-}
-
-/* Loading */
-setTimeout(()=>{
-document.getElementById("loadingScreen").style.display="none";
-document.body.style.overflow="auto";
-},1200);
-
-/* Questions */
-const questions=[
-{q:"They post single life lowkey peaceful while dating you.",correct:"red"},
-{q:"They repost relationship quotes but won’t claim you.",correct:"red"},
-{q:"They make a playlist named after you.",correct:"green"},
-{q:"They start arguments before going out.",correct:"red"},
-{q:"They hype your selfies publicly.",correct:"green"},
-{q:"They call you bro in public but baby in private.",correct:"red"},
-{q:"They delete dating apps without asking.",correct:"green"},
-{q:"They trigger you for fun.",correct:"red"}
-];
-
-questions.sort(()=>Math.random()-0.5);
-
-let current=0;
-let score=0;
-let finished=false;
-
-function loadQuestion(){
-if(current<questions.length){
-document.getElementById("counter").innerText=
-"Q"+(current+1)+" / "+questions.length;
-document.getElementById("question").innerText=
-questions[current].q;
-updateProgress();
-}else{
-endGame();
-}
-}
-
-function answer(choice){
-if(finished) return;
-
-if(choice===questions[current].correct){
-score++;
-playCorrect();
-flash("#00c853");
-}else{
-playWrong();
-flash("#ff0000");
-}
-current++;
-setTimeout(loadQuestion,500);
-}
-
-function updateProgress(){
-let percent=(current/questions.length)*100;
-document.getElementById("progressBar").style.width=percent+"%";
-}
-
-function flash(color){
-document.body.style.background=color;
-setTimeout(()=>document.body.style.background="",250);
-}
-
-/* Confetti */
-function launchConfetti(){
-for(let i=0;i<60;i++){
-let c=document.createElement("div");
-c.className="confetti";
-c.style.left=Math.random()*window.innerWidth+"px";
-c.style.background=`hsl(${Math.random()*360},100%,50%)`;
-document.body.appendChild(c);
-setTimeout(()=>c.remove(),3000);
-}
-}
-
-/* Watcher */
-function triggerWatcher(){
-let popup=document.getElementById("watcherPopup");
-popup.style.display="block";
-playHorror();
-setTimeout(()=>popup.style.display="none",4000);
-}
-
-/* Ex typing faster */
-function fakeTyping(){
-let popup=document.getElementById("typingPopup");
-popup.style.display="block";
-playNotify();
-setTimeout(()=>{
-popup.innerText="💬 Your ex sent: 'hey stranger'";
-playNotify();
-setTimeout(()=>document.getElementById("dmBox").style.display="block",800);
-},1500);
-}
-
-function closeDM(){
-document.getElementById("dmBox").style.display="none";
-}
-
-/* End */
-function endGame(){
-finished=true;
-
-let total=questions.length;
-let quote="";
-
-if(score<=2){
-quote="Romantically blind.";
-triggerWatcher();
-}
-else if(score<=5){
-quote="You see the signs… but you still reply fast.";
-}
-else{
-quote="Certified Red Flag Detector.";
-launchConfetti();
-}
-
-document.getElementById("result").innerHTML=`
-<div class="resultCard">
-<h2>${score}/${total}</h2>
-<p>${quote}</p>
-<button class="funBtn" onclick="location.reload()">Play Again</button>
+  <button onclick="shareResult()">Share Result</button>
+  <button onclick="downloadResultImage()">Download Image</button>
+  <button onclick="location.reload()">Play Again</button>
+  <button onclick="escapePage()">⚠ ESCAPE THIS PAGE</button>
 </div>
-`;
 
-setTimeout(fakeTyping,2000);
-}
-
-loadQuestion();
-
-</script>
+<script src="script.js"></script>
 </body>
 </html>
