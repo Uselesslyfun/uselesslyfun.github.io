@@ -1,18 +1,206 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Red Flag Test</title>
-    <link rel="stylesheet" href="style.css">
+  <title>🚩 Red Flag or Green Flag</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      color: white;
+      transition: background 0.5s ease;
+    }
+
+    h1 {
+      margin-top: 30px;
+      font-size: 40px;
+      text-shadow: 2px 2px 10px black;
+    }
+
+    #gameBox {
+      margin-top: 60px;
+    }
+
+    #question {
+      font-size: 24px;
+      margin: 20px;
+      min-height: 60px;
+    }
+
+    button {
+      padding: 15px 30px;
+      margin: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .red {
+      background: #ff0000;
+      color: white;
+    }
+
+    .green {
+      background: #00c853;
+      color: white;
+    }
+
+    .intenseBtn {
+      background: black;
+      color: yellow;
+      border: 2px solid yellow;
+    }
+
+    button:hover {
+      transform: scale(1.1);
+    }
+
+    #scoreBox {
+      font-size: 22px;
+      margin-top: 30px;
+    }
+
+    #warningBox {
+      display: none;
+      background: rgba(0,0,0,0.8);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    #warningBox button {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Red Flag Test</h1>
-        <p>This is where the chaos begins.</p>
+<h1>🚩 RED FLAG OR GREEN FLAG 🌿</h1>
 
-        <a href="index.html">← Back to Playground</a>
-    </div>
+<div id="gameBox">
+  <div id="question"></div>
+
+  <button class="red" onclick="answer('red')">🚩 Red Flag</button>
+  <button class="green" onclick="answer('green')">🌿 Green Flag</button>
+
+  <div id="scoreBox"></div>
+
+  <br><br>
+  <button class="intenseBtn" onclick="startIntense()">⚠ INTENSE VERSION</button>
+</div>
+
+<!-- WARNING POPUP -->
+<div id="warningBox">
+  <h2>⚠ WARNING ⚠</h2>
+  <p>These 5 questions will decide your FATE.</p>
+  <p>Are you mentally prepared?</p>
+  <button onclick="confirmIntense()">YES. I FEAR NOTHING.</button>
+  <button onclick="closeWarning()">No I'm weak.</button>
+</div>
+
+<script>
+  let questions = [
+    { q: "She still has Tinder installed... just in case.", correct: "red" },
+    { q: "He says 'trust me' but hides his phone when you walk in.", correct: "red" },
+    { q: "She hangs out alone with her boy bestie every weekend.", correct: "red" },
+    { q: "He replies after 6 hours but was online the whole time.", correct: "red" },
+    { q: "She posts quotes about 'if he wanted to he would'.", correct: "red" },
+    { q: "He remembers your smallest details.", correct: "green" },
+    { q: "She defends you in front of others.", correct: "green" },
+    { q: "He communicates instead of disappearing.", correct: "green" }
+  ];
+
+  let intenseQuestions = [
+    { q: "They say all their exes were 'crazy'.", correct: "red" },
+    { q: "They say 'I don't believe in labels'.", correct: "red" },
+    { q: "They flirt as a 'joke' with others.", correct: "red" },
+    { q: "They say 'I’m just bad at texting' but text others instantly.", correct: "red" },
+    { q: "They say 'You’re overthinking' every time you question them.", correct: "red" }
+  ];
+
+  let current = 0;
+  let score = 0;
+  let playingIntense = false;
+
+  function loadQuestion() {
+    let set = playingIntense ? intenseQuestions : questions;
+
+    if (current < set.length) {
+      document.getElementById("question").innerText = set[current].q;
+    } else {
+      endGame();
+    }
+  }
+
+  function answer(choice) {
+    let set = playingIntense ? intenseQuestions : questions;
+
+    if (choice === set[current].correct) {
+      score++;
+      document.body.style.background = "green";
+      playCorrectSound();
+    } else {
+      document.body.style.background = "darkred";
+      playWrongSound();
+    }
+
+    setTimeout(() => {
+      document.body.style.background = "linear-gradient(135deg, #ff416c, #ff4b2b)";
+      current++;
+      loadQuestion();
+    }, 1000);
+  }
+
+  function endGame() {
+    document.getElementById("question").innerText = "GAME OVER.";
+    document.getElementById("scoreBox").innerText =
+      "Your Score: " + score + " / " + 
+      (playingIntense ? intenseQuestions.length : questions.length);
+
+    if (playingIntense) {
+      document.getElementById("question").innerText =
+        score >= 4 ? "YOU SURVIVED THE INTENSE TEST 😈" : "YOU FAILED. REFLECT ON YOUR LIFE.";
+    }
+  }
+
+  function startIntense() {
+    document.getElementById("warningBox").style.display = "flex";
+  }
+
+  function confirmIntense() {
+    playingIntense = true;
+    current = 0;
+    score = 0;
+    document.getElementById("warningBox").style.display = "none";
+    loadQuestion();
+  }
+
+  function closeWarning() {
+    document.getElementById("warningBox").style.display = "none";
+  }
+
+  function playCorrectSound() {
+    let audio = new Audio("https://www.soundjay.com/buttons/sounds/button-4.mp3");
+    audio.volume = 1.0;
+    audio.play();
+  }
+
+  function playWrongSound() {
+    let audio = new Audio("https://www.soundjay.com/buttons/sounds/button-10.mp3");
+    audio.volume = 1.0;
+    audio.play();
+  }
+
+  loadQuestion();
+</script>
 
 </body>
 </html>
