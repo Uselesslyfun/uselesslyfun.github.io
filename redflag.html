@@ -208,6 +208,12 @@ so... was I the red flag?
 /* AUDIO ENGINE */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+document.addEventListener("click", () => {
+if(audioCtx.state==="suspended"){
+audioCtx.resume();
+}
+});
+
 function playTone(freq,duration){
 let osc=audioCtx.createOscillator();
 let gain=audioCtx.createGain();
@@ -222,6 +228,7 @@ setTimeout(()=>osc.stop(),duration);
 function playCorrect(){ playTone(850,150); }
 function playWrong(){ playTone(200,200); }
 function playNotify(){ playTone(600,120); }
+
 function playHorror(){
 let osc=audioCtx.createOscillator();
 let gain=audioCtx.createGain();
@@ -231,6 +238,29 @@ osc.frequency.value=60;
 gain.gain.value=0.4;
 osc.start();
 setTimeout(()=>osc.stop(),600);
+}
+
+/* 🔥 NEW: Dad Ringtone */
+function playRingtone(){
+let osc=audioCtx.createOscillator();
+let gain=audioCtx.createGain();
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+gain.gain.value=0.3;
+osc.start();
+
+let freq=500;
+osc.frequency.value=freq;
+
+let interval=setInterval(()=>{
+freq = freq===500 ? 650 : 500;
+osc.frequency.value=freq;
+},400);
+
+setTimeout(()=>{
+clearInterval(interval);
+osc.stop();
+},3000);
 }
 
 /* Loading */
@@ -306,12 +336,14 @@ setTimeout(()=>c.remove(),3000);
 }
 }
 
-/* Watcher */
+/* Watcher FIXED */
 function triggerWatcher(){
 let popup=document.getElementById("watcherPopup");
 popup.style.display="block";
 playHorror();
-setTimeout(()=>popup.style.display="none",4000);
+setTimeout(()=>{
+popup.style.display="none";
+},4000);
 }
 
 /* Fake Typing + Score Logic */
@@ -326,9 +358,22 @@ popup.style.display="none";
 if(score < 5){
 document.getElementById("angryPopup").style.display="block";
 playHorror();
-}else{
+}
+else{
 document.getElementById("dmBox").style.display="block";
 playNotify();
+
+/* 🔥 DAD CALL AFTER DM */
+setTimeout(()=>{
+playRingtone();
+alert("📞 Dad is calling...");
+},2500);
+
+setTimeout(()=>{
+playNotify();
+alert("Dad: I'm proud of you champ.");
+},5000);
+
 }
 
 },1500);
