@@ -155,7 +155,7 @@ body {
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0);
     backdrop-filter: blur(8px);
     transition: all 0.3s ease;
 }
@@ -180,6 +180,7 @@ body {
     right: 0;
     background: linear-gradient(to bottom, #f00, #c00);
     box-shadow: 0 0 15px #f00, 0 0 30px #f00;
+
 }
 
 /* Keep text above edges */
@@ -418,4 +419,16 @@ padding:12px 20px;
 border-radius:10px;
 display:none;
 font-size:14px;
+}
+
+.games{
+display:flex;
+justify-content:center;
+gap:20px;
+flex-wrap:wrap;
+margin-top:30px;
+}
+
+.games a{
+text-decoration:none;
 }
