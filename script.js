@@ -1,306 +1,195 @@
-// ==========================
-// QUESTIONS
-// ==========================
 const questions = [
-  "They post 'single life lowkey peaceful' while actively dating.",
-  "They repost relationship quotes but won’t claim you.",
-  "They make a playlist named after you.",
-  "They start arguments before going out 'just in case.'",
-  "They hype your selfies in comments, not just DMs.",
-  "They call you 'bro' in public but 'baby' in private.",
-  "They actually delete dating apps without you asking.",
-  "They say 'I like crazy people' and then trigger you on purpose."
+{q:"They post single life lowkey peaceful while dating you.",correct:"red"},
+{q:"They repost relationship quotes but won’t claim you.",correct:"red"},
+{q:"They make a playlist named after you.",correct:"green"},
+{q:"They start arguments before going out.",correct:"red"},
+{q:"They hype your selfies publicly.",correct:"green"},
+{q:"They call you bro in public but baby in private.",correct:"red"},
+{q:"They delete dating apps without asking.",correct:"green"},
+{q:"They trigger you for fun.",correct:"red"}
 ];
 
-const answers = [
-  "red","red","green","red",
-  "green","red","green","red"
-];
-
-const relationshipLabels = [
-  "Emotionally Stable Icon",
-  "Walking Red Flag Detector",
-  "Hopeless Romantic",
-  "Certified Delulu",
-  "Soft but Dangerous",
-  "Low Tolerance Legend",
-  "Situationship Survivor",
-  "Main Character Energy"
-];
+questions.sort(()=>Math.random()-0.5);
 
 let current = 0;
 let score = 0;
-let gameEnded = false;
-let watcherTriggered = false;
+let wrongStreak = 0;
+let finished = false;
 
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// ==========================
-// SOUND ENGINE (FORCE SAFE)
-// ==========================
-function createSound(url){
-  const audio = new Audio(url);
-  audio.preload = "auto";
-  return audio;
+function tone(freq,time){
+let o=audioCtx.createOscillator();
+let g=audioCtx.createGain();
+o.connect(g);
+g.connect(audioCtx.destination);
+o.frequency.value=freq;
+g.gain.value=0.2;
+o.start();
+setTimeout(()=>o.stop(),time);
 }
 
-const correctSound = createSound("https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3");
-const wrongSound = createSound("https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3");
-const booSound = createSound("https://assets.mixkit.co/active_storage/sfx/1562/1562-preview.mp3");
-const clapSound = createSound("https://assets.mixkit.co/active_storage/sfx/366/366-preview.mp3");
-const horrorSound = createSound("https://assets.mixkit.co/active_storage/sfx/253/253-preview.mp3");
-const notifSound = createSound("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+function correctSound(){tone(850,150)}
+function wrongSound(){tone(200,200)}
+function notifySound(){tone(600,120)}
 
-function playSound(sound){
-  sound.pause();
-  sound.currentTime = 0;
-  sound.play().catch(()=>{});
-}
-
-
-// ==========================
-// START GAME
-// ==========================
-function startGame(){
-  current = 0;
-  score = 0;
-  gameEnded = false;
-  watcherTriggered = false;
-
-  document.getElementById("startScreen").style.display = "none";
-  document.getElementById("gameScreen").style.display = "block";
-
-  loadQuestion();
-
-  // 👁 GUARANTEED WATCH MESSAGE
-  setTimeout(triggerWatcher, 2500);
-
-  // 💬 EX MESSAGE QUICK
-  setTimeout(showExMessage, 4000);
-
-  // 🔔 RANDOM MID NOTIFICATIONS
-  setTimeout(randomNotification, 6000);
-  setTimeout(randomNotification, 10000);
-}
-
-
-// ==========================
-// LOAD QUESTION
-// ==========================
 function loadQuestion(){
-  if(current >= questions.length){
-    endGame();
-    return;
-  }
 
-  document.getElementById("questionCounter").innerText =
-    "Q" + (current+1) + " / " + questions.length;
+if(current<questions.length){
 
-  document.getElementById("questionText").innerText =
-    questions[current];
+document.getElementById("question").innerText=questions[current].q;
+document.getElementById("counter").innerText=
+"Q"+(current+1)+" / "+questions.length;
+
+updateProgress();
+
+}else{
+endGame();
 }
 
+}
 
-// ==========================
-// ANSWER
-// ==========================
 function answer(choice){
-  if(gameEnded) return;
 
-  let correct = answers[current];
+if(finished)return;
 
-  if(choice === correct){
-    score++;
-    document.body.style.backgroundColor = "#1e4d2b";
-    playSound(correctSound);
-  }else{
-    document.body.style.backgroundColor = "#4d1e1e";
-    playSound(wrongSound);
-  }
+if(choice===questions[current].correct){
 
-  setTimeout(()=>{
-    document.body.style.backgroundColor = "#121212";
-    current++;
-    loadQuestion();
-  }, 500);
+score++;
+wrongStreak=0;
+correctSound();
+
+}else{
+
+wrongSound();
+wrongStreak++;
+
 }
 
+current++;
 
-// ==========================
-// END GAME
-// ==========================
-function endGame(){
-  if(gameEnded) return;
-  gameEnded = true;
+/* WATCHER EVENT - reduced probability */
 
-  document.getElementById("gameScreen").style.display = "none";
-  document.getElementById("resultScreen").style.display = "block";
-
-  let total = questions.length;
-  let resultText = score + " / " + total;
-  let quote = "";
-  let label = relationshipLabels[Math.floor(Math.random()*relationshipLabels.length)];
-
-  if(score <= 2){
-    quote = "Certified walking red flag.";
-    playSound(booSound);
-  }
-  else if(score <= 5){
-    quote = "You survive… but barely.";
-  }
-  else{
-    quote = "Elite standards. Respect.";
-    playSound(clapSound);
-  }
-
-  let fakePlayers = 1500 + Math.floor(Math.random()*5000);
-
-  document.getElementById("finalScore").innerText = resultText;
-  document.getElementById("finalQuote").innerText = quote;
-  document.getElementById("livePlayers").innerText =
-    fakePlayers + " people played in the last hour.";
-
-  document.getElementById("relationshipLabel").innerText =
-    "Your Relationship Type: " + label;
+if(Math.random()<0.08){
+triggerWatcher();
 }
 
+/* RAGE MODE */
 
-// ==========================
-// AUTO SCREENSHOT GENERATOR
-// ==========================
-function downloadResultImage(){
-  const canvas = document.createElement("canvas");
-  canvas.width = 600;
-  canvas.height = 400;
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle = "#121212";
-  ctx.fillRect(0,0,600,400);
-
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.fillText("Red Flag Green Flag", 150, 80);
-
-  ctx.font = "50px Arial";
-  ctx.fillText(score + "/8", 250, 180);
-
-  ctx.font = "20px Arial";
-  ctx.fillText("Play now at yoursite.com", 180, 300);
-
-  const link = document.createElement("a");
-  link.download = "my-score.png";
-  link.href = canvas.toDataURL();
-  link.click();
+if(wrongStreak>=3){
+triggerRage();
+wrongStreak=0;
 }
 
+setTimeout(loadQuestion,400);
 
-// ==========================
-// SHARE
-// ==========================
-function shareResult(){
-  let text = "I scored " + score + "/8 on Red Flag Green Flag. Can you beat me?";
-
-  if(navigator.share){
-    navigator.share({
-      title: "Red Flag Green Flag",
-      text: text,
-      url: window.location.href
-    });
-  }else{
-    alert(text);
-  }
 }
 
+function updateProgress(){
 
-// ==========================
-// ESCAPE
-// ==========================
-function escapePage(){
-  window.location.href = "index.html";
+let percent=(current/questions.length)*100;
+document.getElementById("progressBar").style.width=percent+"%";
+
 }
 
+/* WATCHER */
 
-// ==========================
-// WATCHER FIXED
-// ==========================
 function triggerWatcher(){
-  if(watcherTriggered) return;
-  watcherTriggered = true;
 
-  playSound(horrorSound);
+let popup=document.getElementById("watcherPopup");
 
-  const msg = document.createElement("div");
-  msg.innerText = "Someone is watching you play.";
-  msg.style.position = "fixed";
-  msg.style.top = "15%";
-  msg.style.left = "50%";
-  msg.style.transform = "translateX(-50%)";
-  msg.style.background = "black";
-  msg.style.color = "red";
-  msg.style.padding = "20px";
-  msg.style.border = "2px solid red";
-  msg.style.zIndex = "9999";
-  msg.style.fontSize = "20px";
+popup.style.display="block";
 
-  document.body.appendChild(msg);
+setTimeout(()=>{
+popup.style.display="none";
+},2500);
 
-  setTimeout(()=>{
-    msg.remove();
-  }, 2000);
 }
 
+/* RAGE MODE */
 
-// ==========================
-// EX MESSAGE
-// ==========================
-function showExMessage(){
-  const popup = document.createElement("div");
-  popup.innerText = "Your ex just viewed your profile.";
-  popup.style.position = "fixed";
-  popup.style.bottom = "20px";
-  popup.style.right = "20px";
-  popup.style.background = "#222";
-  popup.style.color = "white";
-  popup.style.padding = "15px";
-  popup.style.borderRadius = "10px";
-  popup.style.zIndex = "9999";
+function triggerRage(){
 
-  document.body.appendChild(popup);
+let rage=document.createElement("div");
 
-  setTimeout(()=>{
-    popup.remove();
-  }, 2000);
+rage.innerText="YOU KEEP MISSING RED FLAGS";
+
+rage.style.position="fixed";
+rage.style.top="50%";
+rage.style.left="50%";
+rage.style.transform="translate(-50%,-50%)";
+rage.style.background="black";
+rage.style.padding="30px";
+rage.style.border="2px solid red";
+rage.style.fontSize="20px";
+rage.style.zIndex="999";
+
+document.body.appendChild(rage);
+
+setTimeout(()=>{
+rage.remove();
+},2000);
+
 }
 
+/* RESULT */
 
-// ==========================
-// RANDOM MID GAME NOTIF
-// ==========================
-function randomNotification(){
-  if(gameEnded) return;
+function endGame(){
 
-  const messages = [
-    "Your friend just sent you this game.",
-    "Someone screenshot their result.",
-    "3 people just failed this question.",
-    "Your ex is online.",
-    "You are being judged."
-  ];
+finished=true;
 
-  const popup = document.createElement("div");
-  popup.innerText = messages[Math.floor(Math.random()*messages.length)];
-  popup.style.position = "fixed";
-  popup.style.bottom = "60px";
-  popup.style.right = "20px";
-  popup.style.background = "#333";
-  popup.style.color = "white";
-  popup.style.padding = "12px";
-  popup.style.borderRadius = "8px";
-  popup.style.zIndex = "9999";
+let total=questions.length;
 
-  playSound(notifSound);
-  document.body.appendChild(popup);
+let title="";
 
-  setTimeout(()=>{
-    popup.remove();
-  },2000);
+if(score<=2){
+title="Emotionally Blind";
 }
+
+else if(score<=5){
+title="Situationally Aware";
+}
+
+else{
+title="Certified Red Flag Detector";
+}
+
+let fakePlayers=Math.floor(Math.random()*3000)+7000;
+
+document.getElementById("result").innerHTML=`
+
+<div class="resultCard">
+
+<h2>${score}/${total}</h2>
+
+<p>${title}</p>
+
+<p style="opacity:0.6;font-size:12px">
+${fakePlayers.toLocaleString()} people failed this test today.
+</p>
+
+<button onclick="location.reload()">Play Again</button>
+
+<button onclick="shareScore()">Share Result</button>
+
+</div>
+
+`;
+
+}
+
+/* SHARE */
+
+function shareScore(){
+
+let text="I scored "+score+" in Red Flag Detector 😎";
+
+navigator.clipboard.writeText(text);
+
+alert("Score copied! Send to friends.");
+
+}
+
+/* START */
+
+loadQuestion();
