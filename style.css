@@ -380,4 +380,42 @@ animation:glitch 0.1s infinite;
 
 .small-name {
     padding-left: 5px;
+}/* GLITCH EFFECT */
+.glitchScreen{
+animation: glitchAnim 0.15s infinite;
+}
+
+@keyframes glitchAnim{
+0%{transform:translate(2px,-2px);}
+25%{transform:translate(-2px,2px);}
+50%{transform:translate(2px,2px);}
+75%{transform:translate(-2px,-2px);}
+100%{transform:translate(0,0);}
+}
+
+/* BUTTON REVERSE WARNING */
+#reversePopup{
+position:fixed;
+top:40%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#111;
+color:white;
+padding:20px 30px;
+border-radius:10px;
+display:none;
+z-index:999;
+font-size:18px;
+}
+
+/* CHAOS MESSAGE */
+#chaosPopup{
+position:fixed;
+bottom:30px;
+right:20px;
+background:#222;
+padding:12px 20px;
+border-radius:10px;
+display:none;
+font-size:14px;
 }
