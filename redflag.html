@@ -28,6 +28,9 @@ Analyzing your dating instincts...
 <div id="typingPopup">💬 Your ex is typing...</div>
 <div id="watcherPopup">👁 Someone is watching you play...</div>
 
+<div id="reversePopup">🔁 Controls Reversed!</div>
+<div id="chaosPopup"></div>
+
 <div id="dmBox">
 <b>Instagram DM</b>
 <hr>
@@ -47,16 +50,17 @@ so... was I the red flag?
 
 <!-- Dad Call UI -->
 <div id="dadCall">
-  <div id="callCard">
-    <h2>📞 Incoming Call</h2>
-    <p><b>Dad</b></p>
-    <button onclick="acceptCall()">Accept</button>
-  </div>
+<div id="callCard">
+<h2>📞 Incoming Call</h2>
+<p><b>Dad</b></p>
+<button onclick="acceptCall()">Accept</button>
+</div>
 </div>
 
 <script>
 
 /* AUDIO */
+
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 document.addEventListener("click",()=>{
@@ -96,25 +100,30 @@ osc.connect(gain);
 gain.connect(audioCtx.destination);
 gain.gain.value=0.3;
 osc.start();
+
 let freq=500;
 osc.frequency.value=freq;
+
 let interval=setInterval(()=>{
 freq=freq===500?650:500;
 osc.frequency.value=freq;
 },400);
+
 setTimeout(()=>{
 clearInterval(interval);
 osc.stop();
-},4000);
+},3000);
 }
 
 /* Loading */
+
 setTimeout(()=>{
 document.getElementById("loadingScreen").style.display="none";
 document.body.style.overflow="auto";
 },1200);
 
 /* Questions */
+
 const questions=[
 {q:"They post single life lowkey peaceful while dating you.",correct:"red"},
 {q:"They repost relationship quotes but won’t claim you.",correct:"red"},
@@ -131,153 +140,363 @@ questions.sort(()=>Math.random()-0.5);
 let current=0;
 let score=0;
 let finished=false;
+let reversed=false;
+
+/* RANDOM NOTIFICATIONS */
+
+const notifications=[
+"📱 Your friend sent a reel",
+"💬 Someone replied to your story",
+"🔥 Your crush liked your story",
+"👀 Someone screenshot your profile",
+"📸 New follower request"
+];
+
+function randomNotification(){
+
+let n=document.createElement("div");
+n.innerText=notifications[Math.floor(Math.random()*notifications.length)];
+
+n.style.position="fixed";
+n.style.bottom="20px";
+n.style.left="20px";
+n.style.background="#111";
+n.style.padding="10px 15px";
+n.style.borderRadius="10px";
+n.style.fontSize="14px";
+
+document.body.appendChild(n);
+
+playNotify();
+
+setTimeout(()=>n.remove(),2500);
+
+}
+
+/* QUESTION */
 
 function loadQuestion(){
+
 if(current<questions.length){
+
 document.getElementById("counter").innerText=
 "Q"+(current+1)+" / "+questions.length;
+
 document.getElementById("question").innerText=
 questions[current].q;
+
 updateProgress();
+
 }else{
 endGame();
 }
+
 }
 
 function answer(choice){
+
 if(finished) return;
 
 if(choice===questions[current].correct){
+
 score++;
 playCorrect();
 flash("#00c853");
+
 }else{
+
 playWrong();
 flash("#ff0000");
+
 }
+
 current++;
+
+/* CHAOS EVENTS */
+
+if(Math.random()<0.08){
+glitchAttack();
+}
+
+if(Math.random()<0.06){
+reverseButtons();
+}
+
+if(Math.random()<0.12){
+randomChaos();
+}
+
+if(Math.random()<0.15){
+setTimeout(randomNotification,500);
+}
+
+if(Math.random()<0.08){
+setTimeout(triggerWatcher,400);
+}
+
 setTimeout(loadQuestion,500);
+
 }
 
 function updateProgress(){
+
 let percent=(current/questions.length)*100;
 document.getElementById("progressBar").style.width=percent+"%";
+
 }
 
 function flash(color){
+
 document.body.style.background=color;
 setTimeout(()=>document.body.style.background="",250);
+
 }
 
-/* Confetti */
-function launchConfetti(){
-for(let i=0;i<60;i++){
-let c=document.createElement("div");
-c.className="confetti";
-c.style.left=Math.random()*window.innerWidth+"px";
-c.style.background=`hsl(${Math.random()*360},100%,50%)`;
-document.body.appendChild(c);
-setTimeout(()=>c.remove(),3000);
-}
-}
+/* GLITCH ATTACK */
 
-/* Watcher */
-function triggerWatcher(){
-let popup=document.getElementById("watcherPopup");
-popup.style.display="block";
-document.body.classList.add("glitch");
+function glitchAttack(){
+
+document.body.classList.add("glitchScreen");
+
 playHorror();
+
+setTimeout(()=>{
+document.body.classList.remove("glitchScreen");
+},500);
+
+}
+
+/* REVERSE BUTTONS */
+
+function reverseButtons(){
+
+let redBtn=document.querySelector(".red");
+let greenBtn=document.querySelector(".green");
+let parent=redBtn.parentNode;
+
+parent.insertBefore(greenBtn,redBtn);
+
+reversed=!reversed;
+
+let popup=document.getElementById("reversePopup");
+popup.style.display="block";
+
+playNotify();
+
 setTimeout(()=>{
 popup.style.display="none";
-document.body.classList.remove("glitch");
-},4000);
+},1200);
+
 }
 
-/* Dad Call */
+/* RANDOM CHAOS */
+
+function randomChaos(){
+
+let chaos=[
+"📵 Internet unstable...",
+"🧠 Your brain lagged.",
+"📱 Your crush is typing...",
+"🧃 Take a water break.",
+"👀 Someone is judging your answers."
+];
+
+let popup=document.getElementById("chaosPopup");
+
+popup.innerText=chaos[Math.floor(Math.random()*chaos.length)];
+
+popup.style.display="block";
+
+playNotify();
+
+setTimeout(()=>{
+popup.style.display="none";
+},2000);
+
+}
+
+/* WATCHER */
+
+function triggerWatcher(){
+
+let popup=document.getElementById("watcherPopup");
+
+popup.style.display="block";
+
+playHorror();
+
+setTimeout(()=>{
+popup.style.display="none";
+},350);
+
+}
+
+/* CONFETTI */
+
+function launchConfetti(){
+
+for(let i=0;i<60;i++){
+
+let c=document.createElement("div");
+
+c.className="confetti";
+
+c.style.left=Math.random()*window.innerWidth+"px";
+
+c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+
+document.body.appendChild(c);
+
+setTimeout(()=>c.remove(),3000);
+
+}
+
+}
+
+/* DAD CALL */
+
 function triggerDadCall(){
+
 document.getElementById("dadCall").style.display="flex";
+
 document.body.classList.add("shakeScreen");
+
 playRingtone();
+
 }
 
 function acceptCall(){
+
 document.body.classList.remove("shakeScreen");
+
 document.getElementById("dadCall").style.display="none";
+
 playNotify();
+
 alert("Dad: I'm proud of you champ 💛");
+
 }
 
-/* Typing */
+/* TYPING */
+
 function fakeTyping(){
+
 let popup=document.getElementById("typingPopup");
+
 popup.style.display="block";
+
 playNotify();
 
 setTimeout(()=>{
+
 popup.style.display="none";
 
 if(score<5){
+
 document.getElementById("angryPopup").style.display="block";
-document.body.classList.add("shakeScreen");
+
 playHorror();
-setTimeout(()=>document.body.classList.remove("shakeScreen"),2000);
+
 }else{
+
 document.getElementById("dmBox").style.display="block";
+
 playNotify();
-setTimeout(triggerDadCall,2500);
+
+setTimeout(triggerDadCall,1500);
+
 }
 
-},1500);
+},1200);
+
 }
 
-function closeDM(){ document.getElementById("dmBox").style.display="none"; }
-function closeAngry(){ document.getElementById("angryPopup").style.display="none"; }
+function closeDM(){
+document.getElementById("dmBox").style.display="none";
+}
 
-/* Share */
+function closeAngry(){
+document.getElementById("angryPopup").style.display="none";
+}
+
+/* SHARE */
+
 function shareScore(){
+
 let text="I scored "+score+" in Red Flag Detector 😎";
+
 navigator.clipboard.writeText(text);
+
 alert("Copied to clipboard!");
+
 }
 
-/* End */
+/* END GAME */
+
 function endGame(){
+
 finished=true;
+
 let total=questions.length;
+
 let quote="";
 
 if(score<=2){
+
 quote="Romantically blind.";
 triggerWatcher();
+
 }
+
 else if(score<=5){
+
 quote="You see the signs… but you still reply fast.";
+
 }
+
 else{
+
 quote="Certified Red Flag Detector.";
 launchConfetti();
+
 }
 
 document.getElementById("result").innerHTML=`
+
 <div class="resultCard">
+
 <h2>${score}/${total}</h2>
+
 <p>${quote}</p>
+
 <button class="funBtn" onclick="location.reload()">Play Again</button>
+
 <button class="funBtn" onclick="shareScore()">Share Result</button>
+
 </div>
+
 `;
 
-setTimeout(fakeTyping,2000);
+setTimeout(fakeTyping,1500);
+
 }
 
-/* Easter Egg */
+/* EASTER EGG */
+
 let titleClicks=0;
+
 document.getElementById("mainTitle").addEventListener("click",()=>{
+
 titleClicks++;
+
 if(titleClicks>=5){
+
 alert("SECRET MODE ACTIVATED 🤯");
+
 document.body.style.background="black";
+
 }
+
 });
 
 loadQuestion();
