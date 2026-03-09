@@ -514,3 +514,115 @@ opacity:0;
 
 }
 
+#titleScreen{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100vw;
+height:100vh;
+background:black;
+justify-content:center;
+align-items:center;
+}
+
+/* HORROR TITLE */
+
+.glitchTitle{
+position:absolute;
+top:80px;
+font-family:'Creepster', cursive;
+font-size:70px;
+letter-spacing:3px;
+color:white;
+text-shadow:
+0 0 5px red,
+0 0 15px red,
+0 0 30px darkred;
+
+animation:horrorGlitch 0.2s infinite;
+animation:horrorGlitch 0.2s infinite, flicker 2s infinite;
+}
+
+@keyframes horrorGlitch{
+
+0%{ transform:translate(0); }
+25%{ transform:translate(-2px,2px); }
+50%{ transform:translate(2px,-2px); }
+75%{ transform:translate(-2px,-2px); }
+100%{ transform:translate(0); }
+
+}
+@keyframes flicker{
+
+0%{opacity:1;}
+50%{opacity:0.85;}
+100%{opacity:1;}
+
+}
+
+/* RED BUTTON */
+
+#startButton{
+
+position:absolute;
+top:-120px;
+
+padding:20px 50px;
+font-size:22px;
+font-weight:bold;
+
+background:#b30000;
+color:white;
+
+border:none;
+border-radius:50px;
+
+box-shadow:
+0 0 10px red,
+0 0 30px red,
+0 0 60px darkred;
+
+cursor:pointer;
+
+transition:0.3s;
+
+animation:buttonDrop 1.2s ease forwards;
+
+}
+
+/* button falling animation */
+
+@keyframes buttonDrop{
+
+0%{ top:-150px; opacity:0; }
+
+60%{ top:55%; opacity:1; }
+
+80%{ top:48%; }
+
+100%{ top:50%; }
+
+}
+
+
+/* button hover */
+
+#startButton:hover{
+
+background:#ff0000;
+
+box-shadow:
+0 0 20px red,
+0 0 50px red,
+0 0 100px darkred;
+
+transform:scale(1.1);
+
+}
+
+#titleScreen{
+
+box-shadow: inset 0 0 200px rgba(255,0,0,0.3);
+
+}
