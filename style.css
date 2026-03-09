@@ -433,3 +433,84 @@ margin-top:30px;
 text-decoration:none;
 }
 
+.chaotic-page{
+background:black;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.scene{
+text-align:center;
+}
+
+.house{
+width:850px;
+image-rendering:pixelated;
+}
+
+.bubble{
+background:white;
+color:black;
+padding:15px;
+border-radius:15px;
+width:250px;
+margin:20px auto;
+font-weight:bold;
+}
+
+.red-glow{
+position:absolute;
+width:200px;
+height:150px;
+background:red;
+filter:blur(80px);
+opacity:0;
+left:26%;
+top:20%;
+transform:translate(-50%,-50%);
+pointer-events:none;
+transition:opacity 0.5s;
+}
+
+.sparks{
+position:absolute;
+left:26%;
+top:20%;
+transform:translate(-50%,-50%);
+pointer-events:none;
+opacity:0;
+}
+
+.sparks span{
+position:absolute;
+width:6px;
+height:6px;
+background:red;
+border-radius:50%;
+box-shadow:0 0 10px red, 0 0 20px red;
+animation: sparkFloat 2s infinite ease-in;
+}
+
+.sparks span:nth-child(1){ left:-20px; animation-delay:0s; }
+.sparks span:nth-child(2){ left:10px; animation-delay:0.3s; }
+.sparks span:nth-child(3){ left:30px; animation-delay:0.6s; }
+.sparks span:nth-child(4){ left:-40px; animation-delay:0.9s; }
+.sparks span:nth-child(5){ left:0px; animation-delay:1.2s; }
+
+@keyframes sparkFloat{
+
+0%{
+transform:translateY(0);
+opacity:1;
+}
+
+100%{
+transform:translateY(-80px);
+opacity:0;
+}
+
+}
+
