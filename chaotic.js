@@ -1,12 +1,28 @@
-let scene = 0;
+let scene = 1;
 
 function nextScene(){
 
-scene++;
+if(scene === 1){
 
-if(scene == 1){
-document.querySelector(".scene-img").src = "house2.png";
-document.querySelector(".dialogue").innerText = "Time to check my laptop.";
+document.getElementById("sceneImage").src = "man1.png";
+document.getElementById("dialogue").innerText =
+"Ahhh.. I'm too bored...";
+
+scene = 2;
+
+}
+
+else if(scene === 2){
+
+document.getElementById("sceneImage").src = "man2.png";
+document.getElementById("dialogue").innerText =
+"WTF IS HAPPENING.. TO MY PC ???";
+
+document.getElementById("laptopGlow").style.opacity = "0.7";
+document.querySelector(".sparks").style.opacity = "1";
+
+scene = 3;
+
 }
 
 }
